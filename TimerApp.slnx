@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TimerApp.Core/TimerApp.Core.csproj" />
+    <Project Path="src/TimerApp.Desktop/TimerApp.Desktop.csproj" />
+  </Folder>
+</Solution>

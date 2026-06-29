@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build *)",
+      "Bash(rtk gain *)",
+      "Bash(rtk discover *)",
+      "Bash(xargs cat)",
+      "Bash(rtk find *)",
+      "Bash(xargs -0 ls)",
+      "Bash(rtk dotnet *)",
+      "Bash(rtk grep *)",
+      "Bash(rtk ls *)",
+      "Bash(rtk read *)",
+      "Bash(dotnet publish *)",
+      "Bash(rtk du *)",
+      "Bash(dotnet add *)",
+      "Bash(dotnet tool *)",
+      "Bash(chmod +x /Users/joaomodesto/Documents/TimerApp/release.sh)"
+    ]
+  }
+}

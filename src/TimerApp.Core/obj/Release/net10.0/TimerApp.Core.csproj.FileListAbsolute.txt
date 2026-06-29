@@ -1,0 +1,10 @@
+/Users/joaomodesto/Documents/TimerApp/src/TimerApp.Core/bin/Release/net10.0/TimerApp.Core.deps.json
+/Users/joaomodesto/Documents/TimerApp/src/TimerApp.Core/bin/Release/net10.0/TimerApp.Core.dll
+/Users/joaomodesto/Documents/TimerApp/src/TimerApp.Core/obj/Release/net10.0/TimerApp.Core.csproj.AssemblyReference.cache
+/Users/joaomodesto/Documents/TimerApp/src/TimerApp.Core/obj/Release/net10.0/TimerApp.Core.GeneratedMSBuildEditorConfig.editorconfig
+/Users/joaomodesto/Documents/TimerApp/src/TimerApp.Core/obj/Release/net10.0/TimerApp.Core.AssemblyInfoInputs.cache
+/Users/joaomodesto/Documents/TimerApp/src/TimerApp.Core/obj/Release/net10.0/TimerApp.Core.AssemblyInfo.cs
+/Users/joaomodesto/Documents/TimerApp/src/TimerApp.Core/obj/Release/net10.0/TimerApp.Core.csproj.CoreCompileInputs.cache
+/Users/joaomodesto/Documents/TimerApp/src/TimerApp.Core/obj/Release/net10.0/TimerApp.Core.dll
+/Users/joaomodesto/Documents/TimerApp/src/TimerApp.Core/obj/Release/net10.0/refint/TimerApp.Core.dll
+/Users/joaomodesto/Documents/TimerApp/src/TimerApp.Core/obj/Release/net10.0/ref/TimerApp.Core.dll

@@ -1,0 +1,745 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TimerApp.Desktop.ViewModels"
+        x:Class="TimerApp.Desktop.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="TibiaTimer"
+        Width="440" Height="712"
+        MinWidth="440" MaxWidth="440"
+        MinHeight="712" MaxHeight="712"
+        Background="#14171d"
+        FontFamily="Inter,SF Pro Display,Segoe UI,system-ui,sans-serif"
+        WindowStartupLocation="CenterScreen"
+        Topmost="True"
+        CanResize="False">
+
+  <Window.DataContext>
+    <vm:MainViewModel/>
+  </Window.DataContext>
+
+  <Window.Styles>
+
+    <!-- Tab buttons -->
+    <Style Selector="Button.tab">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Foreground" Value="#7c8492"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="9"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.tab /template/ ContentPresenter">
+      <Setter Property="Background" Value="{Binding $parent[Button].Background}"/>
+    </Style>
+    <Style Selector="Button.tab:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{Binding $parent[Button].Background}"/>
+    </Style>
+    <Style Selector="Button.tab:pressed /template/ ContentPresenter">
+      <Setter Property="Background" Value="{Binding $parent[Button].Background}"/>
+    </Style>
+    <Style Selector="Button.tab:focus /template/ ContentPresenter">
+      <Setter Property="Background" Value="{Binding $parent[Button].Background}"/>
+    </Style>
+    <Style Selector="Button.tab.active">
+      <Setter Property="Background" Value="#222932"/>
+      <Setter Property="Foreground" Value="#f1f3f5"/>
+    </Style>
+    <Style Selector="Button.tab.active:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#222932"/>
+    </Style>
+
+    <!-- Preset buttons -->
+    <Style Selector="Button.preset">
+      <Setter Property="Background" Value="#181c23"/>
+      <Setter Property="Foreground" Value="#e8eaed"/>
+      <Setter Property="BorderBrush" Value="#242a33"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="13"/>
+      <Setter Property="Padding" Value="14,13"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.preset:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1e2530"/>
+    </Style>
+    <Style Selector="Button.preset:pressed /template/ ContentPresenter">
+      <Setter Property="Background" Value="#181c23"/>
+    </Style>
+
+    <!-- Ghost action buttons (Resetar) -->
+    <Style Selector="Button.action-ghost">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Foreground" Value="#c2c8d2"/>
+      <Setter Property="BorderBrush" Value="#2a313c"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="9"/>
+      <Setter Property="Padding" Value="9"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.action-ghost:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1a1f27"/>
+    </Style>
+
+    <!-- Accent toggle button (Pausar/Continuar/Reiniciar) -->
+    <Style Selector="Button.action-accent">
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="9"/>
+      <Setter Property="Padding" Value="9"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.action-accent:pointerover /template/ ContentPresenter">
+      <Setter Property="Opacity" Value="0.85"/>
+    </Style>
+
+    <!-- Remove (×) button -->
+    <Style Selector="Button.btn-remove">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Foreground" Value="#7c8492"/>
+      <Setter Property="BorderBrush" Value="#2a313c"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="7"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.btn-remove:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1a0c0e"/>
+    </Style>
+    <Style Selector="Button.btn-remove:pointerover TextBlock">
+      <Setter Property="Foreground" Value="#f0556b"/>
+    </Style>
+
+    <!-- Repeat toggle button -->
+    <Style Selector="Button.btn-repeat">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderBrush" Value="#2a313c"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="9"/>
+      <Setter Property="Padding" Value="9,9,11,9"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.btn-repeat:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1a1f27"/>
+    </Style>
+
+    <!-- Iniciar button -->
+    <Style Selector="Button.btn-iniciar">
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="10"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="Height" Value="46"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.btn-iniciar:pointerover /template/ ContentPresenter">
+      <Setter Property="Opacity" Value="0.88"/>
+    </Style>
+    <Style Selector="Button.btn-iniciar:pressed /template/ ContentPresenter">
+      <Setter Property="Opacity" Value="0.75"/>
+    </Style>
+
+    <!-- TextBox form input -->
+    <Style Selector="TextBox.form-input">
+      <Setter Property="Background" Value="#0f1218"/>
+      <Setter Property="Foreground" Value="#e8eaed"/>
+      <Setter Property="BorderBrush" Value="#2a313c"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="9"/>
+      <Setter Property="Padding" Value="12,10"/>
+      <Setter Property="FontSize" Value="15"/>
+      <Setter Property="CaretBrush" Value="#d8b06a"/>
+      <Setter Property="SelectionBrush" Value="#3AD8B06A"/>
+    </Style>
+    <Style Selector="TextBox.form-input:focus /template/ Border#PART_BorderElement">
+      <Setter Property="BorderBrush" Value="#4a5568"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <!-- ProgressBar fill driven by Foreground -->
+    <Style Selector="ProgressBar.timer-bar /template/ Border#PART_Indicator">
+      <Setter Property="Background" Value="{Binding $parent[ProgressBar].Foreground}"/>
+    </Style>
+    <Style Selector="ProgressBar.timer-bar /template/ Border">
+      <Setter Property="CornerRadius" Value="3"/>
+    </Style>
+
+    <!-- Gold slider thumb -->
+    <Style Selector="Slider /template/ Thumb">
+      <Setter Property="Background" Value="#d8b06a"/>
+      <Setter Property="BorderBrush" Value="#c79534"/>
+    </Style>
+    <Style Selector="Slider /template/ Track > Button">
+      <Setter Property="Background" Value="#d8b06a"/>
+    </Style>
+
+  </Window.Styles>
+
+  <DockPanel>
+
+    <!-- ══════════════════ HEADER ══════════════════ -->
+    <StackPanel DockPanel.Dock="Top" Margin="20,18,20,0">
+
+      <!-- Logo row -->
+      <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,16">
+        <Border Width="26" Height="26" CornerRadius="7">
+          <Border.Background>
+            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+              <GradientStop Color="#e8c168" Offset="0"/>
+              <GradientStop Color="#c79534" Offset="1"/>
+            </LinearGradientBrush>
+          </Border.Background>
+          <Panel>
+            <Border Width="2" Height="11" Background="#1a1206" CornerRadius="2"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Border Width="8" Height="2" Background="#1a1206" CornerRadius="2"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Margin="0,5,0,0"/>
+          </Panel>
+        </Border>
+        <TextBlock FontSize="18" FontWeight="ExtraBold" VerticalAlignment="Center">
+          <Run Text="Tibia" Foreground="#e8eaed"/>
+          <Run Text="Timer" Foreground="#d8b06a"/>
+        </TextBlock>
+      </StackPanel>
+
+      <!-- Tab bar -->
+      <Border Background="#0f1218" BorderBrush="#20262f" BorderThickness="1"
+              CornerRadius="11" Padding="4">
+        <Grid ColumnDefinitions="*,4,*">
+
+          <!-- Novo timer -->
+          <Button Grid.Column="0"
+                  Classes="tab"
+                  Classes.active="{Binding IsNewTab}"
+                  Command="{Binding GoToNewTab}">
+            <TextBlock Text="Novo timer"
+                       FontSize="14" FontWeight="SemiBold"
+                       Foreground="{Binding $parent[Button].Foreground}"
+                       HorizontalAlignment="Center"/>
+          </Button>
+
+          <!-- Ativos -->
+          <Button Grid.Column="2"
+                  Classes="tab"
+                  Classes.active="{Binding IsActiveTab}"
+                  Command="{Binding GoToActiveTab}">
+            <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+              <TextBlock Text="Ativos"
+                         FontSize="14" FontWeight="SemiBold"
+                         Foreground="{Binding $parent[Button].Foreground}"
+                         VerticalAlignment="Center"/>
+              <Border IsVisible="{Binding HasActiveTimers}"
+                      MinWidth="18" Height="18"
+                      Padding="5,0" CornerRadius="9"
+                      Background="#d8b06a"
+                      VerticalAlignment="Center">
+                <TextBlock Text="{Binding ActiveTimerCount}"
+                           FontSize="11" FontWeight="ExtraBold"
+                           Foreground="#1a1206"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+              </Border>
+            </StackPanel>
+          </Button>
+
+        </Grid>
+      </Border>
+
+    </StackPanel>
+
+    <!-- ══════════════════ UPDATE BANNER ══════════════════ -->
+    <Border DockPanel.Dock="Top"
+            IsVisible="{Binding UpdateAvailable}"
+            Background="#121d0a"
+            BorderBrush="#2a5010" BorderThickness="0,0,0,1"
+            Padding="16,9">
+      <Grid ColumnDefinitions="*,Auto">
+
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <TextBlock Text="🔄" FontSize="12" VerticalAlignment="Center"/>
+          <TextBlock FontSize="12" Foreground="#8fca4a" VerticalAlignment="Center">
+            <Run Text="Nova versão"/>
+            <Run Text="{Binding UpdateVersion}" FontWeight="Bold" Foreground="#b8f060"/>
+            <Run Text="disponível"/>
+          </TextBlock>
+        </StackPanel>
+
+        <!-- Download progress (visível durante download) -->
+        <StackPanel Grid.Column="1" IsVisible="{Binding IsUpdating}"
+                    Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <ProgressBar Value="{Binding UpdateProgress}"
+                       Minimum="0" Maximum="100"
+                       Width="100" Height="6"
+                       Background="#2a3820"
+                       Foreground="#8fca4a"
+                       BorderThickness="0"
+                       VerticalAlignment="Center"/>
+          <TextBlock FontSize="11" Foreground="#8fca4a" VerticalAlignment="Center">
+            <Run Text="{Binding UpdateProgress}"/>
+            <Run Text="%"/>
+          </TextBlock>
+        </StackPanel>
+
+        <!-- Botão atualizar (visível quando não está baixando) -->
+        <Button Grid.Column="1"
+                IsVisible="{Binding IsNotUpdating}"
+                Command="{Binding ApplyUpdate}"
+                Background="#1e3a0c"
+                BorderBrush="#2a5010" BorderThickness="1"
+                Foreground="#8fca4a"
+                CornerRadius="7"
+                Padding="12,5"
+                FontSize="12" FontWeight="Bold"
+                Cursor="Hand"
+                VerticalAlignment="Center">
+          <Button.Styles>
+            <Style Selector="Button /template/ ContentPresenter">
+              <Setter Property="Background" Value="{Binding $parent[Button].Background}"/>
+            </Style>
+            <Style Selector="Button:pointerover /template/ ContentPresenter">
+              <Setter Property="Background" Value="#284d10"/>
+            </Style>
+          </Button.Styles>
+          Atualizar agora
+        </Button>
+
+      </Grid>
+    </Border>
+
+    <!-- ══════════════════ FOOTER ══════════════════ -->
+    <Border DockPanel.Dock="Bottom"
+            Background="#0d0f13"
+            BorderBrush="#1e2530" BorderThickness="0,1,0,0"
+            Padding="18,7,18,9">
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
+        <TextBlock Text="Desenvolvido por" FontSize="10" Foreground="#3a414c"/>
+        <TextBlock Text="Baconx" FontSize="10" FontWeight="Bold" Foreground="#5a6478"/>
+        <TextBlock Text="❤" FontSize="10" Foreground="#e53e3e"/>
+      </StackPanel>
+    </Border>
+
+    <!-- ══════════════════ CONTENT ══════════════════ -->
+    <ScrollViewer Padding="20,18,20,32">
+      <Grid>
+
+        <!-- ─────────── NOVO TIMER ─────────── -->
+        <StackPanel IsVisible="{Binding IsNewTab}">
+
+          <TextBlock Text="INÍCIO RÁPIDO"
+                     FontSize="12" FontWeight="Bold"
+                     Foreground="#6b727e"
+                     LetterSpacing="0.6"
+                     Margin="0,0,0,11"/>
+
+          <!-- Preset list -->
+          <StackPanel Spacing="9">
+
+            <!-- Food -->
+            <Button Classes="preset" Command="{Binding StartFood}">
+              <Grid ColumnDefinitions="42,*,Auto">
+                <Border Grid.Column="0" Width="42" Height="42" CornerRadius="10"
+                        Background="#0f1218" BorderBrush="#232932" BorderThickness="1">
+                  <Image Source="avares://TimerApp.Desktop/Assets/images/food.gif"
+                         Width="32" Height="32"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="13,0,0,0">
+                  <TextBlock Text="Food" FontSize="16" FontWeight="Bold" Foreground="#e8eaed"/>
+                  <TextBlock Text="Comida · regenera HP/MP"
+                             FontSize="13" Foreground="#7c8492" Margin="0,1,0,0"/>
+                </StackPanel>
+                <Border Grid.Column="2"
+                        Background="#24F0913E" BorderBrush="#61F0913E" BorderThickness="1"
+                        CornerRadius="7" Padding="9,5" VerticalAlignment="Center">
+                  <TextBlock Text="15:00"
+                             FontFamily="JetBrains Mono,Menlo,Consolas,monospace"
+                             FontSize="13" FontWeight="Bold" Foreground="#f0913e"/>
+                </Border>
+              </Grid>
+            </Button>
+
+            <!-- Boost -->
+            <Button Classes="preset" Command="{Binding StartBoost}">
+              <Grid ColumnDefinitions="42,*,Auto">
+                <Border Grid.Column="0" Width="42" Height="42" CornerRadius="10"
+                        Background="#0f1218" BorderBrush="#232932" BorderThickness="1">
+                  <Image Source="avares://TimerApp.Desktop/Assets/images/boost.gif"
+                         Width="32" Height="32"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="13,0,0,0">
+                  <TextBlock Text="Boost" FontSize="16" FontWeight="Bold" Foreground="#e8eaed"/>
+                  <TextBlock Text="XP boost · 1 hora"
+                             FontSize="13" Foreground="#7c8492" Margin="0,1,0,0"/>
+                </StackPanel>
+                <Border Grid.Column="2"
+                        Background="#247C8CF8" BorderBrush="#617C8CF8" BorderThickness="1"
+                        CornerRadius="7" Padding="9,5" VerticalAlignment="Center">
+                  <TextBlock Text="60:00"
+                             FontFamily="JetBrains Mono,Menlo,Consolas,monospace"
+                             FontSize="13" FontWeight="Bold" Foreground="#7c8cf8"/>
+                </Border>
+              </Grid>
+            </Button>
+
+            <!-- Potion -->
+            <Button Classes="preset" Command="{Binding StartPotion}">
+              <Grid ColumnDefinitions="42,*,Auto">
+                <Border Grid.Column="0" Width="42" Height="42" CornerRadius="10"
+                        Background="#0f1218" BorderBrush="#232932" BorderThickness="1">
+                  <Image Source="avares://TimerApp.Desktop/Assets/images/potion.gif"
+                         Width="32" Height="32"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="13,0,0,0">
+                  <TextBlock Text="Potion" FontSize="16" FontWeight="Bold" Foreground="#e8eaed"/>
+                  <TextBlock Text="Berserk · buff de combate"
+                             FontSize="13" Foreground="#7c8492" Margin="0,1,0,0"/>
+                </StackPanel>
+                <Border Grid.Column="2"
+                        Background="#24F0556B" BorderBrush="#61F0556B" BorderThickness="1"
+                        CornerRadius="7" Padding="9,5" VerticalAlignment="Center">
+                  <TextBlock Text="10:00"
+                             FontFamily="JetBrains Mono,Menlo,Consolas,monospace"
+                             FontSize="13" FontWeight="Bold" Foreground="#f0556b"/>
+                </Border>
+              </Grid>
+            </Button>
+
+          </StackPanel>
+
+          <!-- Customizado section -->
+          <StackPanel Margin="0,22,0,0">
+
+            <StackPanel Orientation="Horizontal" Spacing="9" Margin="0,0,0,13">
+              <Image Source="avares://TimerApp.Desktop/Assets/images/default.gif"
+                     Width="22" Height="22"/>
+              <TextBlock Text="CUSTOMIZADO"
+                         FontSize="12" FontWeight="Bold"
+                         Foreground="#6b727e" LetterSpacing="0.6"
+                         VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <Border Background="#181c23" BorderBrush="#242a33" BorderThickness="1"
+                    CornerRadius="14" Padding="16">
+              <StackPanel>
+
+                <!-- Title -->
+                <TextBlock Text="Título"
+                           FontSize="13" FontWeight="SemiBold"
+                           Foreground="#9aa2af" Margin="0,0,0,7"/>
+                <TextBox Text="{Binding CustomName}"
+                         Classes="form-input"
+                         PlaceholderText="Ex: Exura Sio, SD, treino…"/>
+
+                <!-- Time -->
+                <TextBlock Text="Tempo"
+                           FontSize="13" FontWeight="SemiBold"
+                           Foreground="#9aa2af" Margin="0,15,0,7"/>
+                <Grid ColumnDefinitions="*,9,*">
+
+                  <StackPanel Grid.Column="0" Spacing="5">
+                    <NumericUpDown Value="{Binding CustomHours}"
+                                   Minimum="0" Maximum="23" Increment="1"
+                                   FormatString="00"
+                                   FontFamily="JetBrains Mono,Menlo,Consolas,monospace"
+                                   FontSize="20" FontWeight="Bold"
+                                   Foreground="#f1f3f5"
+                                   Background="#0f1218"
+                                   BorderBrush="#2a313c" BorderThickness="1"
+                                   CornerRadius="9"
+                                   HorizontalContentAlignment="Center"
+                                   Padding="0,6"/>
+                    <TextBlock Text="horas" FontSize="11" FontWeight="SemiBold"
+                               Foreground="#7c8492" HorizontalAlignment="Center"/>
+                  </StackPanel>
+
+                  <StackPanel Grid.Column="2" Spacing="5">
+                    <NumericUpDown Value="{Binding CustomMinutes}"
+                                   Minimum="0" Maximum="59" Increment="1"
+                                   FormatString="00"
+                                   FontFamily="JetBrains Mono,Menlo,Consolas,monospace"
+                                   FontSize="20" FontWeight="Bold"
+                                   Foreground="#f1f3f5"
+                                   Background="#0f1218"
+                                   BorderBrush="#2a313c" BorderThickness="1"
+                                   CornerRadius="9"
+                                   HorizontalContentAlignment="Center"
+                                   Padding="0,6"/>
+                    <TextBlock Text="min" FontSize="11" FontWeight="SemiBold"
+                               Foreground="#7c8492" HorizontalAlignment="Center"/>
+                  </StackPanel>
+
+                </Grid>
+
+                <!-- Iniciar -->
+                <Button Classes="btn-iniciar"
+                        Command="{Binding StartCustomFromForm}"
+                        Margin="0,16,0,0">
+                  <Button.Background>
+                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                      <GradientStop Color="#e8c168" Offset="0"/>
+                      <GradientStop Color="#c79534" Offset="1"/>
+                    </LinearGradientBrush>
+                  </Button.Background>
+                  <TextBlock Text="Iniciar"
+                             FontSize="15" FontWeight="ExtraBold"
+                             Foreground="#1a1206"/>
+                </Button>
+
+              </StackPanel>
+            </Border>
+
+          </StackPanel><!-- /Customizado section -->
+
+          <!-- Volume do alerta -->
+          <Border Background="#181c23" BorderBrush="#242a33" BorderThickness="1"
+                  CornerRadius="12" Padding="14,12" Margin="0,16,0,100">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <TextBlock Grid.Column="0" Text="🔊" FontSize="14"
+                         VerticalAlignment="Center" Margin="0,0,10,0"/>
+              <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="VOLUME DO ALERTA"
+                           FontSize="11" FontWeight="Bold"
+                           Foreground="#6b727e" LetterSpacing="0.5"
+                           Margin="0,0,0,4"/>
+                <Slider Value="{Binding Volume}"
+                        Minimum="0" Maximum="1"
+                        VerticalAlignment="Center"
+                        Margin="0,0,0,0"/>
+              </StackPanel>
+              <TextBlock Grid.Column="2" Text="{Binding VolumeLabel}"
+                         FontSize="13" FontWeight="Bold"
+                         Foreground="#d8b06a"
+                         VerticalAlignment="Center"
+                         MinWidth="36" TextAlignment="Right"
+                         Margin="10,0,0,0"/>
+            </Grid>
+          </Border>
+
+        </StackPanel>
+
+        <!-- ─────────── ATIVOS ─────────── -->
+        <StackPanel Margin="0,0,0,100" IsVisible="{Binding IsActiveTab}">
+
+          <!-- Back to config -->
+          <Button Command="{Binding GoToNewTab}"
+                  Background="Transparent"
+                  Foreground="#6b727e"
+                  BorderBrush="#242a33" BorderThickness="1"
+                  CornerRadius="8"
+                  Padding="10,6"
+                  HorizontalAlignment="Left"
+                  Cursor="Hand"
+                  Margin="0,0,0,14">
+            <Button.Styles>
+              <Style Selector="Button:pointerover /template/ ContentPresenter">
+                <Setter Property="Background" Value="#1a1f27"/>
+              </Style>
+              <Style Selector="Button /template/ ContentPresenter">
+                <Setter Property="Background" Value="Transparent"/>
+              </Style>
+            </Button.Styles>
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <TextBlock Text="←" FontSize="13" Foreground="#d8b06a" VerticalAlignment="Center"/>
+              <TextBlock Text="Novo timer" FontSize="13" FontWeight="SemiBold"
+                         Foreground="#9aa2af" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+
+          <!-- Timer cards -->
+          <ItemsControl  IsVisible="{Binding HasActiveTimers}"
+                        ItemsSource="{Binding ActiveTimers}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:TimerCardViewModel">
+
+                <Border Margin="0,0,0,11"
+                        Background="#181c23"
+                        BorderBrush="#242a33"
+                        BorderThickness="1"
+                        CornerRadius="14"
+                        Padding="13,13,15,15">
+                  <StackPanel>
+
+                    <!-- Card header -->
+                    <Grid ColumnDefinitions="30,*,Auto,8,26" Margin="0,0,0,11">
+
+                      <Image Grid.Column="0"
+                             Source="{Binding CategoryImage}"
+                             Width="30" Height="30"
+                             VerticalAlignment="Center"/>
+
+                      <StackPanel Grid.Column="1" Margin="11,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding TimerName}"
+                                   FontSize="15" FontWeight="Bold"
+                                   Foreground="#e8eaed"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding StatusLine}"
+                                   FontSize="12" Foreground="#7c8492"
+                                   Margin="0,1,0,0"/>
+                      </StackPanel>
+
+                      <!-- Type pill -->
+                      <Border Grid.Column="2"
+                              Background="{Binding SoftBrush}"
+                              BorderBrush="{Binding AccentBorderBrush}"
+                              BorderThickness="1"
+                              CornerRadius="20"
+                              Padding="9,4"
+                              VerticalAlignment="Center">
+                        <TextBlock Text="{Binding TypeLabel}"
+                                   FontSize="11" FontWeight="Bold"
+                                   Foreground="{Binding AccentBrush}"/>
+                      </Border>
+
+                      <!-- Remove -->
+                      <Button Grid.Column="4"
+                              Classes="btn-remove"
+                              Command="{Binding Stop}"
+                              Width="26" Height="26">
+                        <TextBlock Text="×" FontSize="15"
+                                   Foreground="#7c8492"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                      </Button>
+
+                    </Grid>
+
+                    <!-- Big countdown -->
+                    <TextBlock Text="{Binding DisplayTime}"
+                               FontFamily="JetBrains Mono,Menlo,Consolas,monospace"
+                               FontSize="46" FontWeight="Bold"
+                               Foreground="{Binding CountdownBrush}"
+                               HorizontalAlignment="Center"
+                               LetterSpacing="1"
+                               Margin="0,4,0,11"/>
+
+                    <!-- Progress bar -->
+                    <ProgressBar Classes="timer-bar"
+                                 Value="{Binding ProgressPercent}"
+                                 Minimum="0" Maximum="100"
+                                 Height="5"
+                                 Foreground="{Binding ProgressBrush}"
+                                 Background="#0f1218"
+                                 BorderThickness="0"
+                                 Margin="0,0,0,13"/>
+
+                    <!-- Action buttons -->
+                    <Grid ColumnDefinitions="*,8,*,8,Auto">
+
+                      <!-- Pausar / Continuar / Reiniciar -->
+                      <Button Grid.Column="0"
+                              Classes="action-accent"
+                              Command="{Binding TogglePause}"
+                              Background="{Binding SoftBrush}"
+                              BorderBrush="{Binding AccentBorderBrush}">
+                        <TextBlock Text="{Binding ToggleLabel}"
+                                   FontSize="14" FontWeight="Bold"
+                                   Foreground="{Binding AccentBrush}"
+                                   HorizontalAlignment="Center"/>
+                      </Button>
+
+                      <!-- Resetar -->
+                      <Button Grid.Column="2"
+                              Classes="action-ghost"
+                              Command="{Binding ResetTimer}"
+                              Content="Resetar"/>
+
+                      <!-- Repetir toggle -->
+                      <Button Grid.Column="4"
+                              Classes="btn-repeat"
+                              Command="{Binding ToggleRepeat}">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                          <Border Width="15" Height="15" CornerRadius="5"
+                                  Background="{Binding RepeatCheckBrush}"
+                                  BorderBrush="{Binding RepeatCheckBorderBrush}"
+                                  BorderThickness="1">
+                            <Border Width="6" Height="6" CornerRadius="2"
+                                    Background="#14171d"
+                                    IsVisible="{Binding RepeatEnabled}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+                          </Border>
+                          <TextBlock Text="Repetir"
+                                     FontSize="13" FontWeight="SemiBold"
+                                     Foreground="#9aa2af"
+                                     VerticalAlignment="Center"/>
+                        </StackPanel>
+                      </Button>
+
+                    </Grid>
+
+                  </StackPanel>
+                </Border>
+
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <!-- Open overlay button -->
+          <Button Command="{Binding OpenOverlay}"
+                  IsVisible="{Binding HasActiveTimers}"
+                  HorizontalAlignment="Stretch"
+                  HorizontalContentAlignment="Center"
+                  Height="36"
+                  Background="#181c23"
+                  BorderBrush="#242a33"
+                  BorderThickness="1"
+                  CornerRadius="9"
+                  Margin="0,4,0,0"
+                  Cursor="Hand">
+            <Button.Styles>
+              <Style Selector="Button:pointerover /template/ ContentPresenter">
+                <Setter Property="Background" Value="#1e2530"/>
+              </Style>
+            </Button.Styles>
+            <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center">
+              <TextBlock Text="↗" FontSize="14" Foreground="#d8b06a" VerticalAlignment="Center"/>
+              <TextBlock Text="Janela flutuante" FontSize="13" FontWeight="SemiBold"
+                         Foreground="#9aa2af" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+
+          <!-- Empty state -->
+          <StackPanel IsVisible="{Binding !HasActiveTimers}"
+                      HorizontalAlignment="Center"
+                      Margin="24,70,24,0">
+            <Border Width="54" Height="54"
+                    Background="#181c23" BorderBrush="#242a33" BorderThickness="1"
+                    CornerRadius="14" HorizontalAlignment="Center" Margin="0,0,0,18">
+              <Border Width="3" Height="18"
+                      Background="#3a414c" CornerRadius="3"
+                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <TextBlock Text="Nenhum timer ativo"
+                       FontSize="16" FontWeight="Bold"
+                       Foreground="#c2c8d2"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,7"/>
+            <TextBlock FontSize="14" Foreground="#6b727e"
+                       TextAlignment="Center" TextWrapping="Wrap">
+              <Run Text="Escolha um preset ou crie um na aba "/>
+              <Run Text="Novo timer" Foreground="#d8b06a" FontWeight="SemiBold"/>
+              <Run Text="."/>
+            </TextBlock>
+          </StackPanel>
+
+        </StackPanel>
+
+      </Grid>
+    </ScrollViewer>
+
+  </DockPanel>
+</Window>

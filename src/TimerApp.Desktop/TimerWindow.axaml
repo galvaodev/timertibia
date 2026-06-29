@@ -1,0 +1,177 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TimerApp.Desktop.ViewModels"
+        x:Class="TimerApp.Desktop.TimerWindow"
+        x:DataType="vm:MainViewModel"
+        Title="TibiaTimer — Overlay"
+        Width="240" MinWidth="160" MaxWidth="480"
+        SizeToContent="Height"
+        MinHeight="60"
+        Topmost="True"
+        CanResize="True"
+        Background="#0d0f13"
+        FontFamily="Inter,SF Pro Display,Segoe UI,system-ui,sans-serif"
+        WindowStartupLocation="Manual">
+
+  <Window.Styles>
+
+    <!-- Opacity buttons -->
+    <Style Selector="Button.op-btn">
+      <Setter Property="FontSize" Value="10"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Padding" Value="6,3"/>
+      <Setter Property="Height" Value="22"/>
+      <Setter Property="MinWidth" Value="36"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderBrush" Value="#2a313c"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Foreground" Value="#4a5568"/>
+      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.op-btn:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#181c23"/>
+    </Style>
+    <Style Selector="Button.op-btn.active">
+      <Setter Property="BorderBrush" Value="#d8b06a"/>
+      <Setter Property="Foreground" Value="#d8b06a"/>
+    </Style>
+
+    <!-- Pin button -->
+    <Style Selector="Button.pin-btn">
+      <Setter Property="Width" Value="20"/>
+      <Setter Property="Height" Value="20"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderBrush" Value="#d8b06a"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.pin-btn:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1a1206"/>
+    </Style>
+
+    <!-- ProgressBar fill from Foreground -->
+    <Style Selector="ProgressBar.bar /template/ Border#PART_Indicator">
+      <Setter Property="Background" Value="{Binding $parent[ProgressBar].Foreground}"/>
+    </Style>
+    <Style Selector="ProgressBar.bar /template/ Border">
+      <Setter Property="CornerRadius" Value="2"/>
+    </Style>
+
+  </Window.Styles>
+
+  <StackPanel Margin="8,6,8,8">
+
+    <!-- Header -->
+    <Grid Margin="0,0,0,8">
+      <TextBlock Text="⏱ Overlay"
+                 FontSize="11" FontWeight="SemiBold"
+                 Foreground="#4a5568"
+                 VerticalAlignment="Center"/>
+      <Button x:Name="PinButton"
+              Classes="pin-btn"
+              HorizontalAlignment="Right"
+              ToolTip.Tip="Fixar no topo"
+              Click="Pin_Click">
+        <TextBlock x:Name="PinIcon"
+                   Text="⊤" FontSize="10"
+                   Foreground="#d8b06a"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"/>
+      </Button>
+    </Grid>
+
+    <!-- Timer list -->
+    <ItemsControl ItemsSource="{Binding ActiveTimers}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:TimerCardViewModel">
+          <StackPanel Margin="0,0,0,8">
+
+            <Grid ColumnDefinitions="22,*,Auto">
+
+              <Image Grid.Column="0"
+                     Source="{Binding CategoryImage}"
+                     Width="22" Height="22"
+                     VerticalAlignment="Center"/>
+
+              <TextBlock Grid.Column="1"
+                         Text="{Binding TimerName}"
+                         FontSize="12" FontWeight="SemiBold"
+                         Foreground="#9aa2af"
+                         Margin="7,0,6,0"
+                         VerticalAlignment="Center"
+                         TextTrimming="CharacterEllipsis"/>
+
+              <TextBlock Grid.Column="2"
+                         Text="{Binding DisplayTime}"
+                         FontFamily="JetBrains Mono,Menlo,Consolas,monospace"
+                         FontSize="22" FontWeight="Bold"
+                         Foreground="{Binding CountdownBrush}"
+                         VerticalAlignment="Center"/>
+            </Grid>
+
+            <ProgressBar Classes="bar"
+                         Value="{Binding ProgressPercent}"
+                         Minimum="0" Maximum="100"
+                         Height="3"
+                         Foreground="{Binding ProgressBrush}"
+                         Background="#1a1f27"
+                         BorderThickness="0"
+                         Margin="0,4,0,0"/>
+
+          </StackPanel>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
+    <!-- Empty state -->
+    <TextBlock IsVisible="{Binding !HasActiveTimers}"
+               Text="Nenhum timer ativo"
+               FontSize="11" Foreground="#3a414c"
+               HorizontalAlignment="Center"
+               Margin="0,6,0,6"/>
+
+    <!-- Divider -->
+    <Rectangle Height="1" Fill="#1e2530" Margin="0,2,0,6"/>
+
+    <!-- Opacity controls -->
+    <StackPanel Orientation="Horizontal" Spacing="3" HorizontalAlignment="Center">
+      <Button x:Name="Btn50"  Classes="op-btn" Content="50%"  Click="Opacity50_Click"/>
+      <Button x:Name="Btn60"  Classes="op-btn" Content="60%"  Click="Opacity60_Click"/>
+      <Button x:Name="Btn70"  Classes="op-btn" Content="70%"  Click="Opacity70_Click"/>
+      <Button x:Name="Btn90"  Classes="op-btn" Content="90%"  Click="Opacity90_Click"/>
+      <Button x:Name="Btn100" Classes="op-btn active" Content="100%" Click="Opacity100_Click"/>
+    </StackPanel>
+
+    <!-- Open main window -->
+    <Button HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Center"
+            Height="22"
+            Margin="0,5,0,0"
+            FontSize="10" FontWeight="SemiBold"
+            Background="Transparent"
+            BorderBrush="#2a313c" BorderThickness="1"
+            Foreground="#6b727e"
+            CornerRadius="4"
+            Cursor="Hand"
+            Click="OpenMain_Click">
+      <Button.Styles>
+        <Style Selector="Button /template/ ContentPresenter">
+          <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="Button:pointerover /template/ ContentPresenter">
+          <Setter Property="Background" Value="#181c23"/>
+        </Style>
+      </Button.Styles>
+      <StackPanel Orientation="Horizontal" Spacing="5">
+        <TextBlock Text="⌂" FontSize="10" Foreground="#d8b06a" VerticalAlignment="Center"/>
+        <TextBlock Text="Abrir app" FontSize="10" FontWeight="SemiBold"
+                   Foreground="#6b727e" VerticalAlignment="Center"/>
+      </StackPanel>
+    </Button>
+
+  </StackPanel>
+</Window>
