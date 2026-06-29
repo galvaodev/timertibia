@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
+using TimerApp.Desktop.Services;
 using TimerApp.Desktop.ViewModels;
 using Velopack;
 using Velopack.Sources;
@@ -13,8 +14,11 @@ namespace TimerApp.Desktop;
 
 public partial class App : Application
 {
-    private static UpdateManager? _updateManager;
-    private static UpdateInfo?    _pendingUpdate;
+    private static UpdateManager?      _updateManager;
+    private static UpdateInfo?         _pendingUpdate;
+    private static GlobalHotkeyService? _hotkeyService;
+
+    public static GlobalHotkeyService? HotkeyService => _hotkeyService;
 
     public override void Initialize()
     {
@@ -42,12 +46,15 @@ public partial class App : Application
                     desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnLastWindowClose;
                     main.Show();
                     _ = CheckForUpdatesAsync(main);
+                    InitHotkeyService(main);
                 };
             }
             else
             {
-                desktop.MainWindow = new MainWindow();
-                _ = CheckForUpdatesAsync(desktop.MainWindow);
+                var main = new MainWindow();
+                desktop.MainWindow = main;
+                _ = CheckForUpdatesAsync(main);
+                InitHotkeyService(main);
             }
         }
 
@@ -68,6 +75,12 @@ public partial class App : Application
             }
             catch { }
         });
+    }
+
+    private static void InitHotkeyService(MainWindow main)
+    {
+        if (main.DataContext is MainViewModel vm)
+            _hotkeyService = new GlobalHotkeyService(vm);
     }
 
     private static async Task CheckForUpdatesAsync(Window mainWindow)

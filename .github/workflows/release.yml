@@ -42,7 +42,9 @@ jobs:
             --packVersion "${{ steps.version.outputs.VERSION }}" `
             --packDir "./publish/win-x64" `
             --mainExe "TimerApp.Desktop.exe" `
-            --outputDir "./releases"
+            --outputDir "./releases" `
+            --shortcuts Desktop,StartMenuRoot `
+            $(if (Test-Path "src/TimerApp.Desktop/Assets/icon.ico") { "--icon src/TimerApp.Desktop/Assets/icon.ico" })
 
       - name: Publicar no GitHub Releases
         run: |

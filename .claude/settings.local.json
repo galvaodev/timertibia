@@ -16,7 +16,13 @@
       "Bash(dotnet add *)",
       "Bash(dotnet tool *)",
       "Bash(chmod +x /Users/joaomodesto/Documents/TimerApp/release.sh)",
-      "Bash(./release.sh 1.0.0)"
+      "Bash(./release.sh 1.0.0)",
+      "Bash(git rm *)",
+      "Bash(rtk git *)",
+      "Bash(mkdir -p /Users/joaomodesto/Documents/TimerApp/src/TimerApp.Desktop/Models /Users/joaomodesto/Documents/TimerApp/src/TimerApp.Desktop/Services)"
+    ],
+    "additionalDirectories": [
+      "/Users/joaomodesto/Documents/TimerApp/src/TimerApp.Desktop"
     ]
   }
 }

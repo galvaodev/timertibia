@@ -18,8 +18,16 @@ public partial class MainWindow : ReactiveWindow<MainViewModel>
     private void BindViewModel()
     {
         if (DataContext is not MainViewModel vm) return;
-        vm.OverlayRequested -= OnOverlayRequested;
-        vm.OverlayRequested += OnOverlayRequested;
+        vm.OverlayRequested         -= OnOverlayRequested;
+        vm.OverlayRequested         += OnOverlayRequested;
+        vm.HotkeySettingsRequested  -= OnHotkeySettingsRequested;
+        vm.HotkeySettingsRequested  += OnHotkeySettingsRequested;
+    }
+
+    private void OnHotkeySettingsRequested(object? sender, System.EventArgs e)
+    {
+        if (App.HotkeyService is null) return;
+        new HotkeySettingsWindow(App.HotkeyService).Show(this);
     }
 
     private void OnOverlayRequested(object? sender, System.EventArgs e)

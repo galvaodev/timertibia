@@ -76,6 +76,33 @@ public class MainViewModel : ReactiveObject
     public event EventHandler? OverlayRequested;
     public void OpenOverlay() => OverlayRequested?.Invoke(this, EventArgs.Empty);
 
+    // ── Hotkey settings ──────────────────────────────────────────
+
+    public event EventHandler? HotkeySettingsRequested;
+    public void OpenHotkeySettings() => HotkeySettingsRequested?.Invoke(this, EventArgs.Empty);
+
+    // ── Hotkey dispatch ──────────────────────────────────────────
+
+    public void HotkeyStart(TimerCategory cat)
+    {
+        switch (cat)
+        {
+            case TimerCategory.Food:   StartFood();           break;
+            case TimerCategory.Boost:  StartBoost();          break;
+            case TimerCategory.Potion: StartPotion();         break;
+            default:                   StartCustomFromForm(); break;
+        }
+    }
+
+    public void HotkeyPauseResume(TimerCategory cat)
+        => ActiveTimers.FirstOrDefault(t => t.Category == cat)?.TogglePause();
+
+    public void HotkeyReset(TimerCategory cat)
+        => ActiveTimers.FirstOrDefault(t => t.Category == cat)?.ResetTimer();
+
+    public void HotkeyToggleRepeat(TimerCategory cat)
+        => ActiveTimers.FirstOrDefault(t => t.Category == cat)?.ToggleRepeat();
+
     // ── Tab navigation ───────────────────────────────────────────
 
     private string _currentTab = "new";

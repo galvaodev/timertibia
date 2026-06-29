@@ -16,9 +16,10 @@ public class TimerCardViewModel : ReactiveObject
     private readonly TimerInstance  _instance;
 
     // ── Identity ─────────────────────────────────────────────────
-    public string TimerId   => _instance.Config.Id;
-    public string TimerName => _instance.Config.Name;
-    public bool   IsLooping => _instance.Config.IsLooping;
+    public string        TimerId   => _instance.Config.Id;
+    public string        TimerName => _instance.Config.Name;
+    public bool          IsLooping => _instance.Config.IsLooping;
+    public TimerCategory Category  => _instance.Config.Category;
 
     // ── Category ─────────────────────────────────────────────────
     public string TypeLabel => _instance.Config.Category switch

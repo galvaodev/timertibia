@@ -1,0 +1,186 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="TimerApp.Desktop.HotkeySettingsWindow"
+        x:CompileBindings="False"
+        Title="TibiaTimer — Atalhos de Teclado"
+        Width="480" Height="640"
+        MinWidth="480" MaxWidth="480"
+        MinHeight="640" MaxHeight="640"
+        Background="#14171d"
+        FontFamily="Inter,SF Pro Display,Segoe UI,system-ui,sans-serif"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+  <Window.Styles>
+
+    <Style Selector="Button.hk-action">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderBrush" Value="#2a313c"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="7"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Height" Value="28"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.hk-action /template/ ContentPresenter">
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="Button.hk-action:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1a1f27"/>
+    </Style>
+
+    <Style Selector="Button.hk-save">
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="9"/>
+      <Setter Property="Height" Value="40"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.hk-save:pointerover /template/ ContentPresenter">
+      <Setter Property="Opacity" Value="0.88"/>
+    </Style>
+
+  </Window.Styles>
+
+  <DockPanel Margin="22,20,22,18">
+
+    <!-- Header -->
+    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,18">
+      <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+        <Border Width="26" Height="26" CornerRadius="7">
+          <Border.Background>
+            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+              <GradientStop Color="#e8c168" Offset="0"/>
+              <GradientStop Color="#c79534" Offset="1"/>
+            </LinearGradientBrush>
+          </Border.Background>
+          <Panel>
+            <Border Width="2" Height="11" Background="#1a1206" CornerRadius="2"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Border Width="8" Height="2" Background="#1a1206" CornerRadius="2"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Margin="0,5,0,0"/>
+          </Panel>
+        </Border>
+        <TextBlock FontSize="17" FontWeight="ExtraBold" VerticalAlignment="Center">
+          <Run Text="Tibia" Foreground="#e8eaed"/>
+          <Run Text="Timer" Foreground="#d8b06a"/>
+        </TextBlock>
+      </StackPanel>
+      <TextBlock Text="Atalhos de Teclado Globais"
+                 FontSize="13" FontWeight="SemiBold" Foreground="#7c8492"/>
+    </StackPanel>
+
+    <!-- Footer -->
+    <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,12,*" Margin="0,14,0,0">
+      <Button Grid.Column="0"
+              Classes="hk-action"
+              Click="Cancel_Click"
+              Height="40"
+              HorizontalAlignment="Stretch"
+              HorizontalContentAlignment="Center"
+              Foreground="#7c8492">
+        <TextBlock Text="Cancelar"  VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold"/>
+      </Button>
+      <Button Grid.Column="2"
+              Classes="hk-save"
+              Click="Save_Click">
+        <Button.Background>
+          <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Color="#e8c168" Offset="0"/>
+            <GradientStop Color="#c79534" Offset="1"/>
+          </LinearGradientBrush>
+        </Button.Background>
+        <TextBlock  VerticalAlignment="Center" Text="Salvar Atalhos" FontSize="14" FontWeight="ExtraBold" Foreground="#1a1206"/>
+      </Button>
+    </Grid>
+
+    <!-- Groups list -->
+    <ScrollViewer>
+      <ItemsControl ItemsSource="{Binding Groups}" Margin="0,0,0,4">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+
+            <Border Background="#0f1218" BorderBrush="#20262f" BorderThickness="1"
+                    CornerRadius="12" Margin="0,0,0,12" Padding="14,12,14,14">
+              <StackPanel>
+
+                <!-- Group header -->
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,10">
+                  <TextBlock Text="{Binding Icon}" FontSize="15" VerticalAlignment="Center"/>
+                  <TextBlock Text="{Binding CategoryLabel}"
+                             FontSize="13" FontWeight="Bold"
+                             Foreground="#d8b06a" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Slot rows -->
+                <ItemsControl ItemsSource="{Binding Slots}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+
+                      <Grid ColumnDefinitions="110,*,74,8,60,8,28"
+                            Margin="0,0,0,7">
+
+                        <!-- Action label -->
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding Label}"
+                                   FontSize="13" Foreground="#9aa2af"
+                                   VerticalAlignment="Center"/>
+
+                        <!-- Key display -->
+                        <Border Grid.Column="1"
+                                Background="{Binding DisplayBg}"
+                                BorderBrush="{Binding DisplayBorder}"
+                                BorderThickness="1"
+                                CornerRadius="7"
+                                Padding="8,5"
+                                VerticalAlignment="Center">
+                          <TextBlock Text="{Binding Display}"
+                                     FontSize="12"
+                                     FontFamily="JetBrains Mono,Menlo,Consolas,monospace"
+                                     FontWeight="SemiBold"
+                                     Foreground="{Binding DisplayFg}"
+                                     TextTrimming="CharacterEllipsis"/>
+                        </Border>
+
+                        <!-- Definir / Cancelar -->
+                        <Button Grid.Column="4"
+                                
+                                Classes="hk-action"
+                                Width="60"
+                                Click="OnDefine_Click">
+                          <TextBlock Text="{Binding SetButtonText}"
+                                     FontSize="11" FontWeight="SemiBold"
+                                     Foreground="#c2c8d2"
+                                     VerticalAlignment="Center"
+                                     HorizontalAlignment="Center"/>
+                        </Button>
+
+                        <!-- Limpar -->
+                        <Button Grid.Column="6"
+                                Classes="hk-action"
+                                Width="28"
+                                Click="OnClear_Click">
+                          <TextBlock Text="×" FontSize="14"
+                                     Foreground="#7c8492"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"/>
+                        </Button>
+
+                      </Grid>
+
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+              </StackPanel>
+            </Border>
+
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+
+  </DockPanel>
+</Window>
