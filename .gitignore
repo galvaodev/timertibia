@@ -1,0 +1,30 @@
+# ── Build outputs ────────────────────────────────────────────────
+bin/
+obj/
+
+# ── Publish / release ────────────────────────────────────────────
+publish/
+releases/
+*.nupkg
+*.snupkg
+
+# ── IDEs ─────────────────────────────────────────────────────────
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.rsuser
+.DS_Store
+Thumbs.db
+
+# ── .NET ─────────────────────────────────────────────────────────
+*.log
+launchSettings.json
+*.orig
+
+# ── Secrets ──────────────────────────────────────────────────────
+*.env
+.env.*
+appsettings.*.json
+secrets.json
