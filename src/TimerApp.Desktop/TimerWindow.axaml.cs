@@ -62,14 +62,29 @@ public partial class TimerWindow : Window
         var lifetime = Avalonia.Application.Current?.ApplicationLifetime
             as IClassicDesktopStyleApplicationLifetime;
 
-        if (lifetime?.MainWindow is not MainWindow mainWindow) return;
+        if (lifetime == null) return;
 
-        if (DataContext is MainViewModel vm)
-            vm.GoToNewTab();
+        var vm = DataContext as MainViewModel;
+        vm?.GoToNewTab();
 
-        mainWindow.WindowState = Avalonia.Controls.WindowState.Normal;
-        mainWindow.Show();
-        mainWindow.Activate();
+        var mainWindow = lifetime.MainWindow as MainWindow;
+
+        if (mainWindow == null || !mainWindow.IsVisible)
+        {
+            var newWindow = new MainWindow
+            {
+                DataContext = vm
+            };
+            lifetime.MainWindow = newWindow;
+            newWindow.Show();
+            newWindow.Activate();
+        }
+        else
+        {
+            mainWindow.WindowState = Avalonia.Controls.WindowState.Normal;
+            mainWindow.Show();
+            mainWindow.Activate();
+        }
     }
 
     private static void MarkButton(

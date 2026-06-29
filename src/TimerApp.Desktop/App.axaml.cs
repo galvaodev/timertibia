@@ -25,8 +25,30 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow();
-            _ = CheckForUpdatesAsync(desktop.MainWindow);
+            if (!EulaWindow.IsAccepted)
+            {
+                desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnExplicitShutdown;
+                var eula = new EulaWindow();
+                desktop.MainWindow = eula;
+                eula.Closed += (_, _) =>
+                {
+                    if (!EulaWindow.IsAccepted)
+                    {
+                        desktop.Shutdown();
+                        return;
+                    }
+                    var main = new MainWindow();
+                    desktop.MainWindow = main;
+                    desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnLastWindowClose;
+                    main.Show();
+                    _ = CheckForUpdatesAsync(main);
+                };
+            }
+            else
+            {
+                desktop.MainWindow = new MainWindow();
+                _ = CheckForUpdatesAsync(desktop.MainWindow);
+            }
         }
 
         base.OnFrameworkInitializationCompleted();

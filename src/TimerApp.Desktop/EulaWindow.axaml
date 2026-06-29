@@ -1,0 +1,152 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="TimerApp.Desktop.EulaWindow"
+        Title="TibiaTimer — Termos de Uso"
+        Width="500" Height="560"
+        MinWidth="500" MaxWidth="500"
+        MinHeight="560" MaxHeight="560"
+        Background="#14171d"
+        FontFamily="Inter,SF Pro Display,Segoe UI,system-ui,sans-serif"
+        WindowStartupLocation="CenterScreen"
+        CanResize="False">
+
+  <DockPanel Margin="28,24,28,24">
+
+    <!-- Header -->
+    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,18">
+      <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,12">
+        <Border Width="26" Height="26" CornerRadius="7">
+          <Border.Background>
+            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+              <GradientStop Color="#e8c168" Offset="0"/>
+              <GradientStop Color="#c79534" Offset="1"/>
+            </LinearGradientBrush>
+          </Border.Background>
+          <Panel>
+            <Border Width="2" Height="11" Background="#1a1206" CornerRadius="2"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Border Width="8" Height="2" Background="#1a1206" CornerRadius="2"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Margin="0,5,0,0"/>
+          </Panel>
+        </Border>
+        <TextBlock FontSize="18" FontWeight="ExtraBold" VerticalAlignment="Center">
+          <Run Text="Tibia" Foreground="#e8eaed"/>
+          <Run Text="Timer" Foreground="#d8b06a"/>
+        </TextBlock>
+      </StackPanel>
+      <TextBlock Text="Termos de Uso e Isenção de Responsabilidade"
+                 FontSize="14" FontWeight="Bold" Foreground="#c2c8d2"/>
+    </StackPanel>
+
+    <!-- Botões -->
+    <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,12,*" Margin="0,16,0,0">
+
+      <Button Grid.Column="0"
+              Click="Decline_Click"
+              Background="Transparent"
+              Foreground="#7c8492"
+              BorderBrush="#2a313c" BorderThickness="1"
+              CornerRadius="9" Height="42"
+              HorizontalAlignment="Stretch"
+              HorizontalContentAlignment="Center"
+              Cursor="Hand">
+        <Button.Styles>
+          <Style Selector="Button /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+          </Style>
+          <Style Selector="Button:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#1a1f27"/>
+          </Style>
+        </Button.Styles>
+        <TextBlock Text="Recusar e Sair" FontSize="14" FontWeight="SemiBold"/>
+      </Button>
+
+      <Button Grid.Column="2"
+              Click="Accept_Click"
+              CornerRadius="9" Height="42"
+              HorizontalAlignment="Stretch"
+              HorizontalContentAlignment="Center"
+              Cursor="Hand"
+              BorderThickness="0">
+        <Button.Background>
+          <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Color="#e8c168" Offset="0"/>
+            <GradientStop Color="#c79534" Offset="1"/>
+          </LinearGradientBrush>
+        </Button.Background>
+        <Button.Styles>
+          <Style Selector="Button:pointerover /template/ ContentPresenter">
+            <Setter Property="Opacity" Value="0.88"/>
+          </Style>
+        </Button.Styles>
+        <TextBlock Text="Li e Aceito os Termos" FontSize="14" FontWeight="ExtraBold" Foreground="#1a1206"/>
+      </Button>
+
+    </Grid>
+
+    <!-- Conteúdo rolável -->
+    <Border Background="#0f1218" BorderBrush="#20262f" BorderThickness="1"
+            CornerRadius="12">
+      <ScrollViewer Padding="18,16">
+        <StackPanel Spacing="18">
+
+          <StackPanel Spacing="6">
+            <TextBlock Text="O que é o TibiaTimer?"
+                       FontSize="13" FontWeight="Bold" Foreground="#d8b06a"/>
+            <TextBlock FontSize="13" Foreground="#9aa2af" TextWrapping="Wrap" LineHeight="20">
+              TibiaTimer é um aplicativo auxiliar desenvolvido por fãs para jogadores do MMORPG
+              Tibia. Ele fornece temporizadores visuais e sonoros para auxiliar na gestão de
+              itens como comida, poções e buffs durante o jogo.
+            </TextBlock>
+          </StackPanel>
+
+          <StackPanel Spacing="6">
+            <TextBlock Text="Software de Terceiros — Sem Vínculo Oficial"
+                       FontSize="13" FontWeight="Bold" Foreground="#d8b06a"/>
+            <TextBlock FontSize="13" Foreground="#9aa2af" TextWrapping="Wrap" LineHeight="20">
+              Este software é um projeto independente e NÃO possui qualquer vínculo, afiliação,
+              endosso ou parceria com a CipSoft GmbH, desenvolvedora oficial do jogo Tibia.
+              O nome "Tibia" é propriedade da CipSoft GmbH.
+            </TextBlock>
+          </StackPanel>
+
+          <StackPanel Spacing="6">
+            <TextBlock Text="Isenção de Responsabilidade"
+                       FontSize="13" FontWeight="Bold" Foreground="#f0556b"/>
+            <TextBlock FontSize="13" Foreground="#9aa2af" TextWrapping="Wrap" LineHeight="20">
+              O uso deste software é de inteira responsabilidade do usuário. Os desenvolvedores
+              do TibiaTimer não se responsabilizam por quaisquer danos diretos, indiretos,
+              incidentais ou consequentes decorrentes do uso ou impossibilidade de uso deste
+              aplicativo, incluindo mas não se limitando a: perda de dados, suspensão de conta
+              no jogo ou qualquer outro prejuízo.
+            </TextBlock>
+          </StackPanel>
+
+          <StackPanel Spacing="6">
+            <TextBlock Text="Regras do Jogo"
+                       FontSize="13" FontWeight="Bold" Foreground="#d8b06a"/>
+            <TextBlock FontSize="13" Foreground="#9aa2af" TextWrapping="Wrap" LineHeight="20">
+              É de responsabilidade exclusiva do usuário verificar se o uso deste aplicativo
+              está em conformidade com os Termos de Serviço e regras do Tibia. Os desenvolvedores
+              não assumem qualquer responsabilidade por penalidades impostas pela CipSoft em
+              razão do uso deste software.
+            </TextBlock>
+          </StackPanel>
+
+          <StackPanel Spacing="6">
+            <TextBlock Text="Uso Gratuito — Sem Garantias"
+                       FontSize="13" FontWeight="Bold" Foreground="#d8b06a"/>
+            <TextBlock FontSize="13" Foreground="#9aa2af" TextWrapping="Wrap" LineHeight="20">
+              Este software é distribuído gratuitamente, sem garantias de qualquer natureza,
+              expressas ou implícitas. Ao aceitar estes termos, você confirma que compreende
+              e concorda com todas as condições acima.
+            </TextBlock>
+          </StackPanel>
+
+        </StackPanel>
+      </ScrollViewer>
+    </Border>
+
+  </DockPanel>
+</Window>
