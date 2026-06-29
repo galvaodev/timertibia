@@ -44,7 +44,7 @@ jobs:
             --mainExe "TimerApp.Desktop.exe" `
             --outputDir "./releases" `
             --shortcuts Desktop,StartMenuRoot `
-            $(if (Test-Path "src/TimerApp.Desktop/Assets/icon.ico") { "--icon src/TimerApp.Desktop/Assets/icon.ico" })
+            --icon "src/TimerApp.Desktop/Assets/icon.ico"
 
       - name: Publicar no GitHub Releases
         run: |
