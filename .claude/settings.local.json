@@ -15,7 +15,8 @@
       "Bash(rtk du *)",
       "Bash(dotnet add *)",
       "Bash(dotnet tool *)",
-      "Bash(chmod +x /Users/joaomodesto/Documents/TimerApp/release.sh)"
+      "Bash(chmod +x /Users/joaomodesto/Documents/TimerApp/release.sh)",
+      "Bash(./release.sh 1.0.0)"
     ]
   }
 }

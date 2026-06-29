@@ -1,10 +1,1 @@
-/Users/joaomodesto/Documents/TimerApp/publish/win-x64/Assets/sounds/boost.mp3
-/Users/joaomodesto/Documents/TimerApp/publish/win-x64/Assets/sounds/default.mp3
-/Users/joaomodesto/Documents/TimerApp/publish/win-x64/Assets/sounds/food.mp3
-/Users/joaomodesto/Documents/TimerApp/publish/win-x64/Assets/sounds/potion.mp3
-/Users/joaomodesto/Documents/TimerApp/publish/win-x64/av_libglesv2.dll
-/Users/joaomodesto/Documents/TimerApp/publish/win-x64/libHarfBuzzSharp.dll
-/Users/joaomodesto/Documents/TimerApp/publish/win-x64/libHarfBuzzSharp.pdb
-/Users/joaomodesto/Documents/TimerApp/publish/win-x64/libSkiaSharp.dll
-/Users/joaomodesto/Documents/TimerApp/publish/win-x64/libSkiaSharp.pdb
 /Users/joaomodesto/Documents/TimerApp/publish/win-x64/TimerApp.Desktop.exe

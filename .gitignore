@@ -28,3 +28,4 @@ launchSettings.json
 .env.*
 appsettings.*.json
 secrets.json
+publish/

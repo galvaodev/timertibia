@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Instalar Velopack CLI
+        run: dotnet tool install -g vpk
+
+      - name: Extrair versão da tag (remove o 'v' do prefixo)
+        id: version
+        shell: bash
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Publicar para win-x64
+        run: |
+          dotnet publish src/TimerApp.Desktop/TimerApp.Desktop.csproj `
+            -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:DebugType=none -p:DebugSymbols=false `
+            -p:Version=${{ steps.version.outputs.VERSION }} `
+            -o ./publish/win-x64
+
+      - name: Empacotar com Velopack
+        run: |
+          vpk pack `
+            --packId "TibiaTimer" `
+            --packVersion "${{ steps.version.outputs.VERSION }}" `
+            --packDir "./publish/win-x64" `
+            --mainExe "TimerApp.Desktop.exe" `
+            --outputDir "./releases"
+
+      - name: Publicar no GitHub Releases
+        run: |
+          vpk upload github `
+            --repoUrl "https://github.com/${{ github.repository }}" `
+            --publish `
+            --releaseName "TibiaTimer v${{ steps.version.outputs.VERSION }}" `
+            --tag "${{ github.ref_name }}" `
+            --token "${{ secrets.GITHUB_TOKEN }}"

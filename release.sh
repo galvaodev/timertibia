@@ -2,51 +2,27 @@
 # ─────────────────────────────────────────────────────────────────
 # Script de release TibiaTimer
 # Uso: ./release.sh 1.0.0
+#
+# O build e empacotamento rodam automaticamente no GitHub Actions
+# (Windows) após o push da tag.
 # ─────────────────────────────────────────────────────────────────
 set -e
 
-VERSION=${1:-"1.0.0"}
-PUBLISH_DIR="./publish/win-x64"
-RELEASES_DIR="./releases"
+VERSION=${1:?"Informe a versão. Exemplo: ./release.sh 1.0.0"}
+TAG="v$VERSION"
 
-echo "==> Publicando versão $VERSION para win-x64..."
-dotnet publish src/TimerApp.Desktop/TimerApp.Desktop.csproj \
-  -c Release -r win-x64 --self-contained true \
-  -p:PublishSingleFile=true \
-  -p:DebugType=none -p:DebugSymbols=false \
-  -p:Version=$VERSION \
-  -o $PUBLISH_DIR
+# Verifica se já compilou localmente (sanidade)
+echo "==> Verificando compilação local..."
+dotnet build src/TimerApp.Desktop/TimerApp.Desktop.csproj -c Release --nologo -v q
 
-# Remove .pdb desnecessários
-rm -f $PUBLISH_DIR/*.pdb
-
-echo "==> Empacotando com Velopack..."
-export PATH="$PATH:$HOME/.dotnet/tools"
-vpk pack \
-  --packId "TibiaTimer" \
-  --packVersion "$VERSION" \
-  --packDir "$PUBLISH_DIR" \
-  --mainExe "TimerApp.Desktop.exe" \
-  --outputDir "$RELEASES_DIR" \
-  --icon "src/TimerApp.Desktop/Assets/icon.ico" 2>/dev/null || \
-vpk pack \
-  --packId "TibiaTimer" \
-  --packVersion "$VERSION" \
-  --packDir "$PUBLISH_DIR" \
-  --mainExe "TimerApp.Desktop.exe" \
-  --outputDir "$RELEASES_DIR"
+echo "==> Criando tag $TAG..."
+git tag "$TAG"
+git push origin "$TAG"
 
 echo ""
-echo "==> Pronto! Arquivos em: $RELEASES_DIR"
+echo "==> Tag $TAG enviada!"
+echo "    Acompanhe o build em:"
+echo "    https://github.com/galvaodev/timertibia/actions"
 echo ""
-echo "Para publicar no GitHub:"
-echo "  1. Crie o repositório em https://github.com/new"
-echo "  2. Atualize AppConfig.GitHubRepoUrl com a URL do repo"
-echo "  3. Execute:"
-echo "     vpk upload github \\"
-echo "       --repoUrl https://github.com/SEU-USUARIO/TibiaTimer \\"
-echo "       --publish \\"
-echo "       --releaseName \"TibiaTimer v$VERSION\" \\"
-echo "       --tag \"v$VERSION\""
-echo ""
-echo "     (precisa do token GitHub: --token ghp_SEU_TOKEN)"
+echo "    Quando finalizar (~3 min), o release estará em:"
+echo "    https://github.com/galvaodev/timertibia/releases"

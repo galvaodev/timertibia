@@ -250,3 +250,4 @@
 /Users/joaomodesto/Documents/TimerApp/src/TimerApp.Desktop/obj/Release/net10.0/win-x64/refint/TimerApp.Desktop.dll
 /Users/joaomodesto/Documents/TimerApp/src/TimerApp.Desktop/obj/Release/net10.0/win-x64/TimerApp.Desktop.genruntimeconfig.cache
 /Users/joaomodesto/Documents/TimerApp/src/TimerApp.Desktop/obj/Release/net10.0/win-x64/ref/TimerApp.Desktop.dll
+/Users/joaomodesto/Documents/TimerApp/src/TimerApp.Desktop/bin/Release/net10.0/win-x64/Velopack.dll

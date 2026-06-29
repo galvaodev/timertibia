@@ -204,4 +204,5 @@
 /usr/local/share/dotnet/packs/Microsoft.NETCore.App.Ref/10.0.9/ref/net10.0/System.Xml.XPath.XDocument.dll
 /Users/joaomodesto/Documents/TimerApp/src/TimerApp.Core/obj/Release/net10.0/ref/TimerApp.Core.dll
 /Users/joaomodesto/.nuget/packages/tmds.dbus.protocol/0.92.0/lib/net9.0/Tmds.DBus.Protocol.dll
+/Users/joaomodesto/.nuget/packages/velopack/1.2.0/lib/net10.0/Velopack.dll
 /usr/local/share/dotnet/packs/Microsoft.NETCore.App.Ref/10.0.9/ref/net10.0/WindowsBase.dll
