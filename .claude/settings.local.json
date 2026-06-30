@@ -19,7 +19,25 @@
       "Bash(./release.sh 1.0.0)",
       "Bash(git rm *)",
       "Bash(rtk git *)",
-      "Bash(mkdir -p /Users/joaomodesto/Documents/TimerApp/src/TimerApp.Desktop/Models /Users/joaomodesto/Documents/TimerApp/src/TimerApp.Desktop/Services)"
+      "Bash(mkdir -p /Users/joaomodesto/Documents/TimerApp/src/TimerApp.Desktop/Models /Users/joaomodesto/Documents/TimerApp/src/TimerApp.Desktop/Services)",
+      "Bash(git tag *)",
+      "Bash(gh repo *)",
+      "WebSearch",
+      "Bash(dotnet restore *)",
+      "Read(//Users/joaomodesto/.nuget/packages/vosk/**)",
+      "Bash(dotnet-ildasm ~/.nuget/packages/vosk/0.3.38/lib/netstandard2.0/Vosk.dll)",
+      "Bash(dotnet package *)",
+      "Bash(rtk curl *)",
+      "Bash(python3 -m json.tool)",
+      "Bash(say --version)",
+      "Bash(say -v \"?\")",
+      "Bash(say \"teste\")",
+      "Bash(find ~/.nuget/packages/portaudiosharp2/1.0.6 -name \"*.dll\" -o -name \"*.dylib\" -o -name \"*.so\" 2>/dev/null | head -20)",
+      "Read(//Users/joaomodesto/.nuget/packages/portaudiosharp2/1.0.6/**)",
+      "Bash(grep -E \"^Stream$|^Stream\\\\b|PortAudioSharp\\\\.Stream\")",
+      "Read(//private/tmp/patest/**)",
+      "Bash(dotnet run *)",
+      "Bash(grep -v \"^$\")"
     ],
     "additionalDirectories": [
       "/Users/joaomodesto/Documents/TimerApp/src/TimerApp.Desktop"

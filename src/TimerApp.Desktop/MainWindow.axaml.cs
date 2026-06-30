@@ -13,6 +13,7 @@ public partial class MainWindow : ReactiveWindow<MainViewModel>
         InitializeComponent();
         DataContextChanged += (_, _) => BindViewModel();
         BindViewModel();
+        Closed += (_, _) => (DataContext as MainViewModel)?.Dispose();
     }
 
     private void BindViewModel()

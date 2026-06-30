@@ -180,8 +180,9 @@ public class TimerCardViewModel : ReactiveObject
 
     public void ResetTimer()
     {
+        var wasPaused = IsPaused;
         _onReset(TimerId);
-        IsPaused    = false;
+        IsPaused    = wasPaused;
         IsCompleted = false;
         UpdateDisplay();
     }

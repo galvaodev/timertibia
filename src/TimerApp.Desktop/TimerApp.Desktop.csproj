@@ -21,13 +21,19 @@
     </PackageReference>
     <PackageReference Include="NAudio" Version="2.3.0" />
     <PackageReference Include="NAudio.Core" Version="2.3.0" />
+    <PackageReference Include="PortAudioSharp2" Version="1.0.6" />
     <PackageReference Include="SharpHook" Version="5.3.7" />
     <PackageReference Include="Velopack" Version="1.2.0" />
+    <PackageReference Include="Vosk" Version="0.3.38" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TimerApp.Core\TimerApp.Core.csproj" />
   </ItemGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <MacOSXBundleInfo>Info.plist</MacOSXBundleInfo>
+  </PropertyGroup>
 
   <ItemGroup>
     <!-- Imagens embutidas no binário — acessíveis via avares:// -->

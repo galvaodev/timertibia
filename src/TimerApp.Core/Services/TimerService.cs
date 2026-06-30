@@ -95,8 +95,10 @@ public sealed class TimerService : ITimerService, IDisposable
         {
             if (_timers.TryGetValue(timerId, out var timer))
             {
+                var wasPaused = timer.State == TimerState.Paused;
                 timer.Reset();
-                timer.Start();
+                if (!wasPaused)
+                    timer.Start();
             }
         }
     }

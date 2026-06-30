@@ -8,8 +8,10 @@ using ReactiveUI;
 using TimerApp.Core;
 using TimerApp.Core.Models;
 using TimerApp.Core.Services;
+using TimerApp.Desktop.Models;
+using TimerApp.Desktop.Services;
 
-public class MainViewModel : ReactiveObject
+public class MainViewModel : ReactiveObject, IDisposable
 {
     private readonly AppServices _services;
 
@@ -182,8 +184,15 @@ public class MainViewModel : ReactiveObject
 
     public MainViewModel()
     {
-        _services = new AppServices();
+        _services    = new AppServices();
+        _appSettings = AppSettings.Load();
         _services.Timer.AnyTimerElapsed += OnTimerElapsed;
+
+        if (_appSettings.VoiceEnabled)
+        {
+            _voiceEnabled = true;
+            _ = StartVoiceAsync();
+        }
     }
 
     // ── Presets ──────────────────────────────────────────────────
@@ -211,6 +220,140 @@ public class MainViewModel : ReactiveObject
         _services.Timer.StopAll();
         ActiveTimers.Clear();
         SyncCounts();
+    }
+
+    public void Dispose()
+    {
+        _voiceService?.Dispose();
+        _services.Dispose();
+    }
+
+    // ── Voice commands ───────────────────────────────────────────
+
+    private readonly AppSettings       _appSettings;
+    private VoiceCommandService?       _voiceService;
+
+    public static bool IsVoiceSupported => VoiceCommandService.IsSupported;
+
+    public void ToggleVoice() => VoiceEnabled = !VoiceEnabled;
+
+    public string VoiceTooltip => IsVoiceDownloading
+        ? $"Baixando modelo... {VoiceDownloadProgress}%"
+        : $"Voz: {VoiceStatus}";
+
+    public double VoiceMicOpacity => VoiceEnabled ? 1.0 : 0.35;
+
+    private bool _voiceEnabled;
+    public bool VoiceEnabled
+    {
+        get => _voiceEnabled;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _voiceEnabled, value);
+            this.RaisePropertyChanged(nameof(VoiceMicOpacity));
+            _appSettings.VoiceEnabled = value;
+            _appSettings.Save();
+            if (value) _ = StartVoiceAsync();
+            else       StopVoice();
+        }
+    }
+
+    private string _voiceStatus = "desativado";
+    public string VoiceStatus
+    {
+        get => _voiceStatus;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _voiceStatus, value);
+            this.RaisePropertyChanged(nameof(VoiceTooltip));
+        }
+    }
+
+    private bool _isVoiceListening;
+    public bool IsVoiceListening
+    {
+        get => _isVoiceListening;
+        private set => this.RaiseAndSetIfChanged(ref _isVoiceListening, value);
+    }
+
+    private bool _isVoiceDownloading;
+    public bool IsVoiceDownloading
+    {
+        get => _isVoiceDownloading;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isVoiceDownloading, value);
+            this.RaisePropertyChanged(nameof(IsNotVoiceDownloading));
+        }
+    }
+
+    public bool IsNotVoiceDownloading => !_isVoiceDownloading;
+
+    private int _voiceDownloadProgress;
+    public int VoiceDownloadProgress
+    {
+        get => _voiceDownloadProgress;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _voiceDownloadProgress, value);
+            this.RaisePropertyChanged(nameof(VoiceTooltip));
+        }
+    }
+
+    private async System.Threading.Tasks.Task StartVoiceAsync()
+    {
+        if (!IsVoiceSupported)
+        {
+            VoiceStatus = "não disponível no Mac/Linux ainda";
+            _voiceEnabled = false;
+            this.RaisePropertyChanged(nameof(VoiceEnabled));
+            return;
+        }
+
+        if (!VoiceModelManager.IsDownloaded)
+        {
+            IsVoiceDownloading = true;
+            VoiceStatus = "baixando modelo...";
+            try
+            {
+                var progress = new Progress<int>(p =>
+                    Dispatcher.UIThread.Post(() => VoiceDownloadProgress = p));
+                await VoiceModelManager.DownloadAsync(progress);
+            }
+            catch
+            {
+                VoiceStatus        = "erro ao baixar modelo";
+                IsVoiceDownloading = false;
+                _voiceEnabled      = false;
+                this.RaisePropertyChanged(nameof(VoiceEnabled));
+                return;
+            }
+            IsVoiceDownloading = false;
+        }
+
+        _voiceService = new VoiceCommandService(this);
+        _voiceService.StatusChanged += s => Dispatcher.UIThread.Post(() =>
+        {
+            VoiceStatus      = s;
+            IsVoiceListening = s != "desativado";
+        });
+
+        if (!_voiceService.Start(VoiceModelManager.ModelPath))
+        {
+            _voiceEnabled = false;
+            this.RaisePropertyChanged(nameof(VoiceEnabled));
+            _voiceService.Dispose();
+            _voiceService = null;
+        }
+    }
+
+    private void StopVoice()
+    {
+        _voiceService?.Stop();
+        _voiceService?.Dispose();
+        _voiceService    = null;
+        IsVoiceListening = false;
+        VoiceStatus      = "desativado";
     }
 
     // ── Private ──────────────────────────────────────────────────

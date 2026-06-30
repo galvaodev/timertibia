@@ -216,30 +216,57 @@
           </TextBlock>
         </StackPanel>
 
-        <!-- Hotkey settings button -->
-        <Button Grid.Column="2"
-                Command="{Binding OpenHotkeySettings}"
-                Background="Transparent"
-                BorderBrush="#2a313c" BorderThickness="1"
-                CornerRadius="8"
-                Width="32" Height="28"
-                Padding="0"
-                Cursor="Hand"
-                ToolTip.Tip="Atalhos de Teclado"
-                VerticalAlignment="Center">
-          <Button.Styles>
-            <Style Selector="Button /template/ ContentPresenter">
-              <Setter Property="Background" Value="Transparent"/>
-            </Style>
-            <Style Selector="Button:pointerover /template/ ContentPresenter">
-              <Setter Property="Background" Value="#1a1f27"/>
-            </Style>
-          </Button.Styles>
-          <TextBlock Text="⌨" FontSize="14"
-                     Foreground="#7c8492"
-                     HorizontalAlignment="Center"
-                     VerticalAlignment="Center"/>
-        </Button>
+        <!-- Header right buttons -->
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+
+          <!-- Voice toggle button -->
+          <Button Command="{Binding ToggleVoice}"
+                  Background="Transparent"
+                  BorderBrush="#2a313c" BorderThickness="1"
+                  CornerRadius="8"
+                  Width="32" Height="28"
+                  Padding="0"
+                  Cursor="Hand"
+                  ToolTip.Tip="{Binding VoiceTooltip}">
+            <Button.Styles>
+              <Style Selector="Button /template/ ContentPresenter">
+                <Setter Property="Background" Value="Transparent"/>
+              </Style>
+              <Style Selector="Button:pointerover /template/ ContentPresenter">
+                <Setter Property="Background" Value="#1a1f27"/>
+              </Style>
+            </Button.Styles>
+            <TextBlock Text="🎙"
+                       FontSize="13"
+                       Opacity="{Binding VoiceMicOpacity}"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+          </Button>
+
+          <!-- Hotkey settings button -->
+          <Button Command="{Binding OpenHotkeySettings}"
+                  Background="Transparent"
+                  BorderBrush="#2a313c" BorderThickness="1"
+                  CornerRadius="8"
+                  Width="32" Height="28"
+                  Padding="0"
+                  Cursor="Hand"
+                  ToolTip.Tip="Atalhos de Teclado">
+            <Button.Styles>
+              <Style Selector="Button /template/ ContentPresenter">
+                <Setter Property="Background" Value="Transparent"/>
+              </Style>
+              <Style Selector="Button:pointerover /template/ ContentPresenter">
+                <Setter Property="Background" Value="#1a1f27"/>
+              </Style>
+            </Button.Styles>
+            <TextBlock Text="⌨" FontSize="14"
+                       Foreground="#7c8492"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+          </Button>
+
+        </StackPanel>
 
       </Grid>
 
@@ -344,6 +371,35 @@
           Atualizar agora
         </Button>
 
+      </Grid>
+    </Border>
+
+    <!-- ══════════════════ VOICE DOWNLOAD BANNER ══════════════════ -->
+    <Border DockPanel.Dock="Top"
+            IsVisible="{Binding IsVoiceDownloading}"
+            Background="#0d1520"
+            BorderBrush="#203050" BorderThickness="0,0,0,1"
+            Padding="16,9">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <TextBlock Text="🎙" FontSize="12" VerticalAlignment="Center"/>
+          <TextBlock FontSize="12" Foreground="#5a9fd4" VerticalAlignment="Center">
+            <Run Text="Baixando modelo de voz..."/>
+          </TextBlock>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <ProgressBar Value="{Binding VoiceDownloadProgress}"
+                       Minimum="0" Maximum="100"
+                       Width="100" Height="6"
+                       Background="#1a2a40"
+                       Foreground="#5a9fd4"
+                       BorderThickness="0"
+                       VerticalAlignment="Center"/>
+          <TextBlock FontSize="11" Foreground="#5a9fd4" VerticalAlignment="Center">
+            <Run Text="{Binding VoiceDownloadProgress}"/>
+            <Run Text="%"/>
+          </TextBlock>
+        </StackPanel>
       </Grid>
     </Border>
 
