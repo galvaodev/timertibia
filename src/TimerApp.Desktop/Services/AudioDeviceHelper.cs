@@ -4,25 +4,13 @@ using System.Collections.Generic;
 using PortAudioSharp;
 using TimerApp.Desktop.Models;
 
-#if WINDOWS
-using NAudio.Wave;
-#endif
-
 public static class AudioDeviceHelper
 {
     public static List<AudioDevice> GetInputDevices()
     {
-        var devices = new List<AudioDevice>
-        {
-            new(-1, "Padrão do sistema")
-        };
-
+        var devices = new List<AudioDevice> { new(-1, "Padrão do sistema") };
         try
         {
-#if WINDOWS
-            for (int i = 0; i < WaveIn.DeviceCount; i++)
-                devices.Add(new AudioDevice(i, WaveIn.GetCapabilities(i).ProductName));
-#else
             PortAudio.LoadNativeLibrary();
             PortAudio.Initialize();
             try
@@ -35,10 +23,8 @@ public static class AudioDeviceHelper
                 }
             }
             finally { PortAudio.Terminate(); }
-#endif
         }
-        catch { /* se falhar, retorna só o padrão */ }
-
+        catch { }
         return devices;
     }
 }

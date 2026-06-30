@@ -2,7 +2,6 @@ namespace TimerApp.Desktop.Services;
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Vosk;
 using TimerApp.Core.Models;
@@ -56,9 +55,7 @@ public sealed class VoiceCommandService : IDisposable
             _recognizer.SetMaxAlternatives(0);
             _recognizer.SetWords(false);
 
-            _capture = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? new NaudioCapture()
-                : new PortAudioCapture();
+            _capture = new PortAudioCapture();
 
             _capture.DataAvailable += OnAudioData;
             _capture.Start(deviceIndex);
