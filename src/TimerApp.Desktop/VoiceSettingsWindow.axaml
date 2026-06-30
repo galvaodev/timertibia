@@ -1,0 +1,281 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="TimerApp.Desktop.VoiceSettingsWindow"
+        x:CompileBindings="False"
+        Title="TibiaTimer — Comandos de Voz"
+        Width="460" Height="620"
+        MinWidth="460" MaxWidth="460"
+        MinHeight="620" MaxHeight="620"
+        Background="#14171d"
+        FontFamily="Inter,SF Pro Display,Segoe UI,system-ui,sans-serif"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+  <Window.Styles>
+
+    <Style Selector="ComboBox">
+      <Setter Property="Background" Value="#0f1218"/>
+      <Setter Property="BorderBrush" Value="#20262f"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Foreground" Value="#e8eaed"/>
+      <Setter Property="Height" Value="36"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </Style>
+
+    <Style Selector="Button.vo-action">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderBrush" Value="#2a313c"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="7"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Height" Value="40"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.vo-action /template/ ContentPresenter">
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="Button.vo-action:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1a1f27"/>
+    </Style>
+
+    <Style Selector="Button.vo-save">
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="9"/>
+      <Setter Property="Height" Value="40"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.vo-save:pointerover /template/ ContentPresenter">
+      <Setter Property="Opacity" Value="0.88"/>
+    </Style>
+
+    <Style Selector="ToggleSwitch">
+      <Setter Property="OffContent" Value=""/>
+      <Setter Property="OnContent"  Value=""/>
+    </Style>
+
+  </Window.Styles>
+
+  <DockPanel Margin="22,20,22,18">
+
+    <!-- Header -->
+    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,18">
+      <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,8">
+        <Border Width="26" Height="26" CornerRadius="7">
+          <Border.Background>
+            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+              <GradientStop Color="#e8c168" Offset="0"/>
+              <GradientStop Color="#c79534" Offset="1"/>
+            </LinearGradientBrush>
+          </Border.Background>
+          <TextBlock Text="🎙" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+        <TextBlock FontSize="17" FontWeight="ExtraBold" VerticalAlignment="Center">
+          <Run Text="Tibia" Foreground="#e8eaed"/>
+          <Run Text="Timer" Foreground="#d8b06a"/>
+        </TextBlock>
+      </StackPanel>
+      <TextBlock Text="Comandos de Voz"
+                 FontSize="13" FontWeight="SemiBold" Foreground="#7c8492"/>
+    </StackPanel>
+
+    <!-- Footer -->
+    <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,12,*" Margin="0,14,0,0">
+      <Button Grid.Column="0" Classes="vo-action" Click="Cancel_Click"
+              HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+              Foreground="#7c8492">
+        <TextBlock Text="Cancelar" VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold"/>
+      </Button>
+      <Button Grid.Column="2" Classes="vo-save" Click="Save_Click">
+        <Button.Background>
+          <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Color="#e8c168" Offset="0"/>
+            <GradientStop Color="#c79534" Offset="1"/>
+          </LinearGradientBrush>
+        </Button.Background>
+        <TextBlock VerticalAlignment="Center" Text="Salvar" FontSize="14"
+                   FontWeight="ExtraBold" Foreground="#1a1206"/>
+      </Button>
+    </Grid>
+
+    <!-- Content -->
+    <ScrollViewer>
+      <StackPanel Spacing="12">
+
+        <!-- Enable / Disable card -->
+        <Border Background="#0f1218" BorderBrush="#20262f" BorderThickness="1"
+                CornerRadius="12" Padding="16,14">
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel>
+              <TextBlock Text="Ativar comandos de voz"
+                         FontSize="14" FontWeight="SemiBold" Foreground="#e8eaed"/>
+              <TextBlock Text="Reconhecimento offline, sem internet"
+                         FontSize="11" Foreground="#7c8492" Margin="0,2,0,0"/>
+            </StackPanel>
+            <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsEnabled}"
+                          VerticalAlignment="Center"/>
+          </Grid>
+        </Border>
+
+        <!-- Microphone card -->
+        <Border Background="#0f1218" BorderBrush="#20262f" BorderThickness="1"
+                CornerRadius="12" Padding="16,14">
+          <StackPanel Spacing="10">
+            <TextBlock Text="🎤  Microfone" FontSize="13" FontWeight="Bold" Foreground="#d8b06a"/>
+            <TextBlock Text="Selecione o dispositivo de captura de áudio:"
+                       FontSize="12" Foreground="#7c8492"/>
+            <ComboBox ItemsSource="{Binding Devices}"
+                      SelectedItem="{Binding SelectedDevice}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Name}" FontSize="13" Foreground="#e8eaed"/>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Text="Se o microfone padrão não funcionar, tente selecionar um específico."
+                       FontSize="11" Foreground="#4a5260" TextWrapping="Wrap"/>
+          </StackPanel>
+        </Border>
+
+        <!-- Hotkey card -->
+        <Border Background="#0f1218" BorderBrush="#20262f" BorderThickness="1"
+                CornerRadius="12" Padding="16,14">
+          <StackPanel Spacing="10">
+            <TextBlock Text="⌨  Atalho de teclado" FontSize="13" FontWeight="Bold" Foreground="#d8b06a"/>
+            <TextBlock Text="Ativar / desativar o microfone sem abrir configurações:"
+                       FontSize="12" Foreground="#7c8492"/>
+            <Grid ColumnDefinitions="*,8,90,4,36">
+              <!-- Key display -->
+              <Border Grid.Column="0" Background="#0d1018" BorderBrush="#20262f" BorderThickness="1"
+                      CornerRadius="7" Padding="10,7">
+                <TextBlock Text="{Binding VoiceToggleDisplay}"
+                           FontFamily="JetBrains Mono,Menlo,Consolas,monospace"
+                           FontSize="13" FontWeight="Bold" Foreground="#d8b06a"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              </Border>
+              <!-- Define / Cancel button -->
+              <Button Grid.Column="2" Click="DefineHK_Click"
+                      HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                      BorderBrush="#2a313c" BorderThickness="1"
+                      CornerRadius="7" Height="34" Cursor="Hand">
+                <Button.Styles>
+                  <Style Selector="Button /template/ ContentPresenter">
+                    <Setter Property="Background" Value="#141a22"/>
+                  </Style>
+                  <Style Selector="Button:pointerover /template/ ContentPresenter">
+                    <Setter Property="Background" Value="#1e2838"/>
+                  </Style>
+                </Button.Styles>
+                <TextBlock Text="{Binding CaptureButtonText}"
+                           FontSize="12" FontWeight="SemiBold" Foreground="#9aa2af"
+                           VerticalAlignment="Center"/>
+              </Button>
+              <!-- Clear button -->
+              <Button Grid.Column="4" Click="ClearHK_Click"
+                      Background="Transparent"
+                      BorderBrush="#2a313c" BorderThickness="1"
+                      CornerRadius="7" Width="36" Height="34" Cursor="Hand"
+                      HorizontalContentAlignment="Center">
+                <Button.Styles>
+                  <Style Selector="Button /template/ ContentPresenter">
+                    <Setter Property="Background" Value="Transparent"/>
+                  </Style>
+                  <Style Selector="Button:pointerover /template/ ContentPresenter">
+                    <Setter Property="Background" Value="#1a1f27"/>
+                  </Style>
+                </Button.Styles>
+                <TextBlock Text="×" FontSize="16" Foreground="#7c8492"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              </Button>
+            </Grid>
+            <!-- Capturing hint -->
+            <TextBlock IsVisible="{Binding IsCapturingHK}"
+                       Text="Pressione a tecla desejada (Esc para cancelar)"
+                       FontSize="11" Foreground="#d8b06a" FontStyle="Italic"/>
+          </StackPanel>
+        </Border>
+
+        <!-- Wake word card -->
+        <Border Background="#0f1218" BorderBrush="#20262f" BorderThickness="1"
+                CornerRadius="12" Padding="16,14">
+          <StackPanel Spacing="8">
+            <TextBlock Text="📢  Palavra de ativação" FontSize="13" FontWeight="Bold" Foreground="#d8b06a"/>
+            <TextBlock FontSize="12" Foreground="#9aa2af" TextWrapping="Wrap">
+              <Run Text="Todos os comandos começam com "/>
+              <Run Text='"Tempo"' Foreground="#e8c168" FontWeight="SemiBold"/>
+              <Run Text=". O reconhecimento é 100% offline e em português."/>
+            </TextBlock>
+          </StackPanel>
+        </Border>
+
+        <!-- Commands card -->
+        <Border Background="#0f1218" BorderBrush="#20262f" BorderThickness="1"
+                CornerRadius="12" Padding="16,14">
+          <StackPanel Spacing="6">
+            <TextBlock Text="💬  Comandos disponíveis" FontSize="13" FontWeight="Bold" Foreground="#d8b06a" Margin="0,0,0,4"/>
+
+            <Grid ColumnDefinitions="Auto,*" Margin="0,2">
+              <TextBlock Grid.Column="0" Text="tempo comida" Foreground="#e8c168"
+                         FontSize="12" FontFamily="JetBrains Mono,Menlo,Consolas,monospace" Width="180"/>
+              <TextBlock Grid.Column="1" Text="Ativar comida" Foreground="#9aa2af" FontSize="12" VerticalAlignment="Center"/>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*" Margin="0,2">
+              <TextBlock Grid.Column="0" Text="tempo poção" Foreground="#e8c168"
+                         FontSize="12" FontFamily="JetBrains Mono,Menlo,Consolas,monospace" Width="180"/>
+              <TextBlock Grid.Column="1" Text="Ativar poção" Foreground="#9aa2af" FontSize="12" VerticalAlignment="Center"/>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*" Margin="0,2">
+              <TextBlock Grid.Column="0" Text="tempo experiencia" Foreground="#e8c168"
+                         FontSize="12" FontFamily="JetBrains Mono,Menlo,Consolas,monospace" Width="180"/>
+              <TextBlock Grid.Column="1" Text="Ativar experiência (boost)" Foreground="#9aa2af" FontSize="12" VerticalAlignment="Center"/>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*" Margin="0,2">
+              <TextBlock Grid.Column="0" Text="pausar comida" Foreground="#e8c168"
+                         FontSize="12" FontFamily="JetBrains Mono,Menlo,Consolas,monospace" Width="180"/>
+              <TextBlock Grid.Column="1" Text="Pausar / retomar timer" Foreground="#9aa2af" FontSize="12" VerticalAlignment="Center"/>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*" Margin="0,2">
+              <TextBlock Grid.Column="0" Text="voltar tudo" Foreground="#e8c168"
+                         FontSize="12" FontFamily="JetBrains Mono,Menlo,Consolas,monospace" Width="180"/>
+              <TextBlock Grid.Column="1" Text="Retomar todos os timers" Foreground="#9aa2af" FontSize="12" VerticalAlignment="Center"/>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*" Margin="0,2">
+              <TextBlock Grid.Column="0" Text="deletar comida" Foreground="#e8c168"
+                         FontSize="12" FontFamily="JetBrains Mono,Menlo,Consolas,monospace" Width="180"/>
+              <TextBlock Grid.Column="1" Text="Deletar timer específico" Foreground="#9aa2af" FontSize="12" VerticalAlignment="Center"/>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*" Margin="0,2">
+              <TextBlock Grid.Column="0" Text="deletar tudo" Foreground="#e8c168"
+                         FontSize="12" FontFamily="JetBrains Mono,Menlo,Consolas,monospace" Width="180"/>
+              <TextBlock Grid.Column="1" Text="Remove todos os timers" Foreground="#9aa2af" FontSize="12" VerticalAlignment="Center"/>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*" Margin="0,2">
+              <TextBlock Grid.Column="0" Text="tempo reiniciar poção" Foreground="#e8c168"
+                         FontSize="12" FontFamily="JetBrains Mono,Menlo,Consolas,monospace" Width="180"/>
+              <TextBlock Grid.Column="1" Text="Reiniciar timer" Foreground="#9aa2af" FontSize="12" VerticalAlignment="Center"/>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*" Margin="0,2">
+              <TextBlock Grid.Column="0" Text="tempo quinze minutos" Foreground="#e8c168"
+                         FontSize="12" FontFamily="JetBrains Mono,Menlo,Consolas,monospace" Width="180"/>
+              <TextBlock Grid.Column="1" Text="Timer customizado" Foreground="#9aa2af" FontSize="12" VerticalAlignment="Center"/>
+            </Grid>
+
+          </StackPanel>
+        </Border>
+
+        <!-- Tip: macOS permission -->
+        <Border Background="#0f1118" BorderBrush="#1a2030" BorderThickness="1"
+                CornerRadius="10" Padding="14,10">
+          <TextBlock FontSize="11" Foreground="#4a5a70" TextWrapping="Wrap">
+            <Run Text="macOS: " FontWeight="SemiBold"/>
+            <Run Text="Vá em Preferências do Sistema → Privacidade → Microfone e certifique-se de que o Terminal (ou o app) tem permissão de acesso."/>
+          </TextBlock>
+        </Border>
+
+      </StackPanel>
+    </ScrollViewer>
+
+  </DockPanel>
+</Window>

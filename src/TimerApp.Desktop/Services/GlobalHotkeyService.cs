@@ -63,6 +63,8 @@ public sealed class GlobalHotkeyService : IDisposable
             else if (hk.Reset.Matches(code, ctrl, alt, shift))        { _vm.HotkeyReset(cat);        return; }
             else if (hk.ToggleRepeat.Matches(code, ctrl, alt, shift)) { _vm.HotkeyToggleRepeat(cat); return; }
         }
+
+        if (_config.VoiceToggle.Matches(code, ctrl, alt, shift)) { _vm.ToggleVoice(); return; }
     }
 
     public void Dispose()

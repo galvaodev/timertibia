@@ -83,10 +83,11 @@ public class TimerHotkeys
 
 public class HotkeyConfig
 {
-    public TimerHotkeys Food   { get; set; } = new();
-    public TimerHotkeys Potion { get; set; } = new();
-    public TimerHotkeys Boost  { get; set; } = new();
-    public TimerHotkeys Custom { get; set; } = new();
+    public TimerHotkeys  Food         { get; set; } = new();
+    public TimerHotkeys  Potion       { get; set; } = new();
+    public TimerHotkeys  Boost        { get; set; } = new();
+    public TimerHotkeys  Custom       { get; set; } = new();
+    public HotkeyBinding VoiceToggle  { get; set; } = new();
 
     private static readonly string ConfigFile = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),

@@ -219,15 +219,36 @@
         <!-- Header right buttons -->
         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
 
-          <!-- Voice toggle button -->
+          <!-- Mic toggle (verde = ativo, vermelho = inativo) -->
           <Button Command="{Binding ToggleVoice}"
+                  Background="{Binding VoiceMicBackground}"
+                  BorderBrush="{Binding VoiceMicBorderBrush}" BorderThickness="1"
+                  CornerRadius="8"
+                  Width="32" Height="28"
+                  Padding="0"
+                  Cursor="Hand"
+                  ToolTip.Tip="{Binding VoiceTooltip}">
+            <Button.Styles>
+              <Style Selector="Button:pointerover /template/ ContentPresenter">
+                <Setter Property="Opacity" Value="0.8"/>
+              </Style>
+            </Button.Styles>
+            <TextBlock Text="🎙"
+                       FontSize="13"
+                       Foreground="{Binding VoiceMicIconColor}"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+          </Button>
+
+          <!-- Voice settings button (⚙) -->
+          <Button Command="{Binding OpenVoiceSettings}"
                   Background="Transparent"
                   BorderBrush="#2a313c" BorderThickness="1"
                   CornerRadius="8"
                   Width="32" Height="28"
                   Padding="0"
                   Cursor="Hand"
-                  ToolTip.Tip="{Binding VoiceTooltip}">
+                  ToolTip.Tip="Configurar Voz">
             <Button.Styles>
               <Style Selector="Button /template/ ContentPresenter">
                 <Setter Property="Background" Value="Transparent"/>
@@ -236,9 +257,8 @@
                 <Setter Property="Background" Value="#1a1f27"/>
               </Style>
             </Button.Styles>
-            <TextBlock Text="🎙"
-                       FontSize="13"
-                       Opacity="{Binding VoiceMicOpacity}"
+            <TextBlock Text="⚙" FontSize="13"
+                       Foreground="#7c8492"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"/>
           </Button>

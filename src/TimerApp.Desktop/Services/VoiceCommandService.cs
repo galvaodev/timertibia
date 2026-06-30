@@ -4,43 +4,64 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Vosk;
 using TimerApp.Core.Models;
 using TimerApp.Desktop.ViewModels;
 
 public sealed class VoiceCommandService : IDisposable
 {
-    private const string WakeWord          = "oi timer";
-    private const int    SampleRate        = 16000;
-    private const double CommandTimeoutSec = 6.0;
+    private static readonly Regex MinutesDigitRegex = new(
+        @"(\d{1,3})\s*minuto", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    // Vocabulário restrito às palavras PT que o modelo conhece.
+    // Isso força o modelo a escolher a palavra mais próxima desta lista,
+    // melhorando muito o reconhecimento de palavras curtas/específicas.
+    private const string Grammar = """
+        ["tempo",
+         "comida", "poção", "experiência",
+         "ativar", "pausar", "deletar", "reiniciar", "continuar", "voltar",
+         "tudo", "todos",
+         "um", "dois", "tres", "quatro", "cinco", "seis", "sete", "oito", "nove", "dez",
+         "onze", "doze", "treze", "quatorze", "quinze", "dezesseis", "dezessete", "dezoito", "dezenove",
+         "vinte", "trinta", "quarenta", "cinquenta", "sessenta",
+         "minuto", "minutos", "[unk]"]
+        """;
+
+    private const int    SampleRate      = 16000;
+    private const double CooldownSeconds = 3.0;
 
     private readonly MainViewModel _vm;
     private VoskRecognizer?        _recognizer;
     private IAudioCapture?         _capture;
-    private Timer?                 _commandTimeout;
-    private bool                   _awaitingCommand;
+    private DateTime               _lastCommand = DateTime.MinValue;
     private bool                   _disposed;
 
-    public event Action<string>? StatusChanged;
+    public event Action<string>?         StatusChanged;
+    public event Action<string>?         PartialReceived;
+    public event Action<string, string>? TranscriptReceived;
 
-    public static bool IsSupported => true; // Win + Mac + Linux via PortAudio
+    public static bool IsSupported => true;
 
     public VoiceCommandService(MainViewModel vm) => _vm = vm;
 
-    public bool Start(string modelPath)
+    // ── Lifecycle ─────────────────────────────────────────────────
+
+    public bool Start(string modelPath, int deviceIndex = -1)
     {
         try
         {
-            Vosk.SetLogLevel(-1);
+            Vosk.SetLogLevel(0); // mostra warnings do grammar no console — útil para debug
             var model = new Model(modelPath);
-            _recognizer = new VoskRecognizer(model, SampleRate);
+            _recognizer = new VoskRecognizer(model, SampleRate, Grammar);
             _recognizer.SetMaxAlternatives(0);
             _recognizer.SetWords(false);
 
-            _capture = CreateCapture();
+            _capture = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? new NaudioCapture()
+                : new PortAudioCapture();
+
             _capture.DataAvailable += OnAudioData;
-            _capture.Start();
+            _capture.Start(deviceIndex);
 
             NotifyStatus("escutando...");
             return true;
@@ -55,10 +76,6 @@ public sealed class VoiceCommandService : IDisposable
 
     public void Stop()
     {
-        _commandTimeout?.Dispose();
-        _commandTimeout  = null;
-        _awaitingCommand = false;
-
         _capture?.Stop();
         _capture?.Dispose();
         _capture = null;
@@ -69,10 +86,14 @@ public sealed class VoiceCommandService : IDisposable
         NotifyStatus("desativado");
     }
 
-    private static IAudioCapture CreateCapture() =>
-        RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? new NaudioCapture()
-            : new PortAudioCapture();
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        Stop();
+    }
+
+    // ── Audio ─────────────────────────────────────────────────────
 
     private void OnAudioData(byte[] buffer, int bytesRecorded)
     {
@@ -80,120 +101,144 @@ public sealed class VoiceCommandService : IDisposable
 
         if (_recognizer.AcceptWaveform(buffer, bytesRecorded))
         {
-            var text = ExtractField(_recognizer.Result(), "text");
+            var text = ExtractText(_recognizer.Result());
             if (!string.IsNullOrWhiteSpace(text))
-                HandleTranscript(text);
+            {
+                var cmd = text.ToLowerInvariant().Trim();
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    var result = TryExecuteDebug(cmd);
+                    TranscriptReceived?.Invoke(text, result);
+                });
+            }
         }
         else
         {
-            var partial = ExtractField(_recognizer.PartialResult(), "partial");
-            if (!_awaitingCommand && partial.Contains(WakeWord, StringComparison.OrdinalIgnoreCase))
-                EnterCommandMode();
+            var partial = ExtractText(_recognizer.PartialResult());
+            if (!string.IsNullOrWhiteSpace(partial))
+                Avalonia.Threading.Dispatcher.UIThread.Post(
+                    () => PartialReceived?.Invoke(partial));
         }
     }
 
-    private void HandleTranscript(string text)
+    // ── Gate ─────────────────────────────────────────────────────
+    // A palavra de ativação deve ser a PRIMEIRA do comando.
+    // "pausar", "voltar", "deletar" funcionam sozinhos.
+    // "tempo" é obrigatório para ativar, reiniciar e timer customizado.
+
+    private static bool StartsWithTrigger(string t) =>
+        t.StartsWith("tempo")    ||
+        t.StartsWith("pausar")   ||
+        t.StartsWith("voltar")   ||
+        t.StartsWith("continuar")||
+        t.StartsWith("deletar");
+
+    private string TryExecuteDebug(string transcript)
     {
-        var lower = text.ToLowerInvariant().Trim();
+        if (!StartsWithTrigger(transcript))
+            return "❌ sem gatilho";
 
-        if (!_awaitingCommand)
-        {
-            if (!lower.Contains(WakeWord)) return;
+        var now = DateTime.UtcNow;
+        if ((now - _lastCommand).TotalSeconds < CooldownSeconds)
+            return "⏳ cooldown";
+        _lastCommand = now;
 
-            var afterWake = lower[(lower.IndexOf(WakeWord, StringComparison.Ordinal) + WakeWord.Length)..].Trim();
-            if (afterWake.Length > 0)
-            {
-                // "oi timer food" — comando junto com wake word
-                Avalonia.Threading.Dispatcher.UIThread.Post(() => ExecuteCommand(afterWake));
-            }
-            else
-            {
-                EnterCommandMode();
-            }
-            return;
-        }
-
-        _awaitingCommand = false;
-        _commandTimeout?.Dispose();
-        NotifyStatus("escutando...");
-
-        var cmd = lower.Contains(WakeWord)
-            ? lower[(lower.IndexOf(WakeWord, StringComparison.Ordinal) + WakeWord.Length)..].Trim()
-            : lower;
-
-        if (!string.IsNullOrWhiteSpace(cmd))
-            Avalonia.Threading.Dispatcher.UIThread.Post(() => ExecuteCommand(cmd));
-        else
-            VoiceSynthesizer.Speak("Ok, quando precisar é só chamar.");
+        return ExecuteCommand(transcript);
     }
 
-    private void EnterCommandMode()
+    // ── Matching 100% português ───────────────────────────────────
+
+    private static bool IsComida(string c)       => c.Contains("comida");
+    private static bool IsPoção(string c)        => c.Contains("pocao") || c.Contains("poção") || c.Contains("pocões");
+    private static bool IsExperiencia(string c)  => c.Contains("experiencia") || c.Contains("experiência");
+    private static bool IsAll(string c)          => c.Contains("tudo") || c.Contains("todos");
+
+    private static bool IsPauseVerb(string c)    => c.Contains("pausar");
+    private static bool IsDeleteVerb(string c)   => c.Contains("deletar");
+    private static bool IsResetVerb(string c)    => c.Contains("reiniciar");
+    private static bool IsResumeVerb(string c)   => c.Contains("voltar") || c.Contains("continuar");
+    private static bool IsActivateVerb(string c) => c.Contains("ativar");
+
+    // ── Dispatch ──────────────────────────────────────────────────
+
+    private string ExecuteCommand(string cmd)
     {
-        _awaitingCommand = true;
-        NotifyStatus("ouvindo comando...");
-        VoiceSynthesizer.Speak("Olá, o que posso ajudar?");
+        // Deletar tudo
+        if (IsDeleteVerb(cmd) && IsAll(cmd))
+        { _vm.StopAll(); Speak("Todos os timers deletados."); return "✅ deletar tudo"; }
 
-        _commandTimeout?.Dispose();
-        _commandTimeout = new Timer(_ =>
+        // Deletar específico
+        if (IsDeleteVerb(cmd))
         {
-            _awaitingCommand = false;
-            NotifyStatus("escutando...");
-            VoiceSynthesizer.Speak("Ok, quando precisar é só chamar.");
-        }, null, TimeSpan.FromSeconds(CommandTimeoutSec), Timeout.InfiniteTimeSpan);
-    }
-
-    private void ExecuteCommand(string cmd)
-    {
-        // ── Presets ────────────────────────────────────────────────
-        if (cmd.Contains("food"))
-        { _vm.StartFood();   VoiceSynthesizer.Speak("Food ativado!"); return; }
-
-        if (cmd.Contains("boost"))
-        { _vm.StartBoost();  VoiceSynthesizer.Speak("Boost ativado!"); return; }
-
-        if (cmd.Contains("poç") || cmd.Contains("potion"))
-        { _vm.StartPotion(); VoiceSynthesizer.Speak("Potion ativado!"); return; }
-
-        // ── Pausar ────────────────────────────────────────────────
-        if (cmd.StartsWith("pausar") || cmd.StartsWith("pausa"))
-        {
-            if (cmd.Contains("food"))
-            { _vm.HotkeyPauseResume(TimerCategory.Food);   VoiceSynthesizer.Speak("Food pausado."); return; }
-            if (cmd.Contains("boost"))
-            { _vm.HotkeyPauseResume(TimerCategory.Boost);  VoiceSynthesizer.Speak("Boost pausado."); return; }
-            if (cmd.Contains("poç") || cmd.Contains("potion"))
-            { _vm.HotkeyPauseResume(TimerCategory.Potion); VoiceSynthesizer.Speak("Potion pausado."); return; }
+            if (IsComida(cmd))
+            { _vm.HotkeyStop(TimerCategory.Food);   Speak("Comida deletada."); return "✅ deletar comida"; }
+            if (IsPoção(cmd))
+            { _vm.HotkeyStop(TimerCategory.Potion); Speak("Poção deletada."); return "✅ deletar poção"; }
+            if (IsExperiencia(cmd))
+            { _vm.HotkeyStop(TimerCategory.Boost);  Speak("Experiência deletada."); return "✅ deletar experiencia"; }
+            return "⚠️ deletar — qual timer?";
         }
 
-        // ── Continuar ─────────────────────────────────────────────
-        if (cmd.StartsWith("continuar") || cmd.StartsWith("retomar"))
+        // Pausar tudo
+        if (IsPauseVerb(cmd) && IsAll(cmd))
+        { _vm.PauseAll(); Speak("Todos os timers pausados."); return "✅ pausar tudo"; }
+
+        // Pausar específico
+        if (IsPauseVerb(cmd))
         {
-            if (cmd.Contains("food"))
-            { _vm.HotkeyPauseResume(TimerCategory.Food);   VoiceSynthesizer.Speak("Food continuado."); return; }
-            if (cmd.Contains("boost"))
-            { _vm.HotkeyPauseResume(TimerCategory.Boost);  VoiceSynthesizer.Speak("Boost continuado."); return; }
-            if (cmd.Contains("poç") || cmd.Contains("potion"))
-            { _vm.HotkeyPauseResume(TimerCategory.Potion); VoiceSynthesizer.Speak("Potion continuado."); return; }
+            if (IsComida(cmd))
+            { _vm.HotkeyPauseResume(TimerCategory.Food);   Speak("Comida pausada."); return "✅ pausar comida"; }
+            if (IsPoção(cmd))
+            { _vm.HotkeyPauseResume(TimerCategory.Potion); Speak("Poção pausada."); return "✅ pausar poção"; }
+            if (IsExperiencia(cmd))
+            { _vm.HotkeyPauseResume(TimerCategory.Boost);  Speak("Experiência pausada."); return "✅ pausar experiencia"; }
+            return "⚠️ pausar — qual timer?";
         }
 
-        // ── Resetar ───────────────────────────────────────────────
-        if (cmd.StartsWith("resetar") || cmd.StartsWith("reiniciar"))
+        // Voltar tudo
+        if (IsResumeVerb(cmd) && IsAll(cmd))
+        { _vm.ResumeAll(); Speak("Todos os timers retomados."); return "✅ voltar tudo"; }
+
+        // Voltar específico
+        if (IsResumeVerb(cmd))
         {
-            if (cmd.Contains("tudo") || cmd.Contains("todos"))
-            { _vm.StopAll(); VoiceSynthesizer.Speak("Todos os timers parados."); return; }
-            if (cmd.Contains("food"))
-            { _vm.HotkeyReset(TimerCategory.Food);   VoiceSynthesizer.Speak("Food resetado."); return; }
-            if (cmd.Contains("boost"))
-            { _vm.HotkeyReset(TimerCategory.Boost);  VoiceSynthesizer.Speak("Boost resetado."); return; }
-            if (cmd.Contains("poç") || cmd.Contains("potion"))
-            { _vm.HotkeyReset(TimerCategory.Potion); VoiceSynthesizer.Speak("Potion resetado."); return; }
+            if (IsComida(cmd))
+            { _vm.HotkeyPauseResume(TimerCategory.Food);   Speak("Comida retomada."); return "✅ voltar comida"; }
+            if (IsPoção(cmd))
+            { _vm.HotkeyPauseResume(TimerCategory.Potion); Speak("Poção retomada."); return "✅ voltar poção"; }
+            if (IsExperiencia(cmd))
+            { _vm.HotkeyPauseResume(TimerCategory.Boost);  Speak("Experiência retomada."); return "✅ voltar experiencia"; }
         }
 
-        // ── Parar tudo ────────────────────────────────────────────
-        if (cmd.Contains("parar") && (cmd.Contains("tudo") || cmd.Contains("todos")))
-        { _vm.StopAll(); VoiceSynthesizer.Speak("Todos os timers parados."); return; }
+        // Reiniciar tudo
+        if (IsResetVerb(cmd) && IsAll(cmd))
+        { _vm.StopAll(); Speak("Todos os timers reiniciados."); return "✅ reiniciar tudo"; }
 
-        // ── Tempo de X minutos ────────────────────────────────────
+        // Reiniciar específico
+        if (IsResetVerb(cmd))
+        {
+            if (IsComida(cmd))
+            { _vm.HotkeyReset(TimerCategory.Food);   Speak("Comida reiniciada."); return "✅ reiniciar comida"; }
+            if (IsPoção(cmd))
+            { _vm.HotkeyReset(TimerCategory.Potion); Speak("Poção reiniciada."); return "✅ reiniciar poção"; }
+            if (IsExperiencia(cmd))
+            { _vm.HotkeyReset(TimerCategory.Boost);  Speak("Experiência reiniciada."); return "✅ reiniciar experiencia"; }
+            return "⚠️ reiniciar — qual timer?";
+        }
+
+        // Ativar tudo
+        if (IsActivateVerb(cmd) && IsAll(cmd))
+        { _vm.StartAll(); Speak("Comida, poção e experiência ativados!"); return "✅ ativar tudo"; }
+
+        // Ativar preset (com ou sem "ativar")
+        if (IsComida(cmd))
+        { _vm.StartFood();   Speak("Comida ativada!"); return "✅ ativar comida"; }
+        if (IsPoção(cmd))
+        { _vm.StartPotion(); Speak("Poção ativada!"); return "✅ ativar poção"; }
+        if (IsExperiencia(cmd))
+        { _vm.StartBoost();  Speak("Experiência ativada!"); return "✅ ativar experiencia"; }
+
+        // "Tempo X minutos"
         var minutes = ParseMinutes(cmd);
         if (minutes.HasValue)
         {
@@ -201,32 +246,33 @@ public sealed class VoiceCommandService : IDisposable
             _vm.CustomMinutes = minutes.Value;
             _vm.CustomName    = $"{minutes.Value} minutos";
             _vm.StartCustomFromForm();
-            VoiceSynthesizer.Speak($"Timer de {minutes.Value} minutos iniciado!");
-            return;
+            Speak($"Timer de {minutes.Value} minutos iniciado!");
+            return $"✅ tempo {minutes.Value} min";
         }
 
-        VoiceSynthesizer.Speak("Não entendi. Tente novamente.");
+        return "❓ sem comando";
     }
+
+    // ── Helpers ───────────────────────────────────────────────────
+
+    private static void Speak(string text) => VoiceSynthesizer.Speak(text);
 
     private static int? ParseMinutes(string text)
     {
-        var m = Regex.Match(text, @"(\d{1,3})\s*min");
+        var m = MinutesDigitRegex.Match(text);
         if (m.Success && int.TryParse(m.Groups[1].Value, out var n) && n is >= 1 and <= 180)
             return n;
 
+        if (!text.Contains("minuto")) return null;
+
         var words = new Dictionary<string, int>
         {
-            ["um"] = 1,    ["dois"] = 2,    ["três"] = 3,   ["quatro"] = 4,
-            ["cinco"] = 5, ["seis"] = 6,    ["sete"] = 7,   ["oito"] = 8,
-            ["nove"] = 9,  ["dez"] = 10,    ["onze"] = 11,  ["doze"] = 12,
-            ["treze"] = 13, ["quatorze"] = 14, ["quinze"] = 15,
-            ["dezesseis"] = 16, ["dezasseis"] = 16,
-            ["dezessete"] = 17, ["dezoito"] = 18, ["dezenove"] = 19,
-            ["vinte"] = 20, ["trinta"] = 30, ["quarenta"] = 40,
-            ["cinquenta"] = 50, ["sessenta"] = 60
+            ["um"]=1,   ["dois"]=2,  ["tres"]=3,  ["quatro"]=4, ["cinco"]=5,
+            ["seis"]=6, ["sete"]=7,  ["oito"]=8,  ["nove"]=9,   ["dez"]=10,
+            ["onze"]=11,["doze"]=12, ["treze"]=13,["quatorze"]=14,["catorze"]=14,["quinze"]=15,
+            ["dezesseis"]=16,["dezasseis"]=16,["dezessete"]=17,["dezoito"]=18,["dezenove"]=19,
+            ["vinte"]=20,["trinta"]=30,["quarenta"]=40,["cinquenta"]=50,["sessenta"]=60,
         };
-
-        if (!text.Contains("min")) return null;
 
         foreach (var (word, num) in words)
             if (text.Contains(word)) return num;
@@ -234,19 +280,12 @@ public sealed class VoiceCommandService : IDisposable
         return null;
     }
 
-    private static string ExtractField(string json, string field)
+    private static string ExtractText(string json)
     {
-        var match = Regex.Match(json, $"\"{field}\"\\s*:\\s*\"([^\"]*)\"");
+        var match = Regex.Match(json, @"""(?:text|partial)""\s*:\s*""([^""]*)""");
         return match.Success ? match.Groups[1].Value : "";
     }
 
     private void NotifyStatus(string status) =>
         Avalonia.Threading.Dispatcher.UIThread.Post(() => StatusChanged?.Invoke(status));
-
-    public void Dispose()
-    {
-        if (_disposed) return;
-        _disposed = true;
-        Stop();
-    }
 }

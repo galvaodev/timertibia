@@ -6,7 +6,8 @@ using System.Text.Json;
 
 public class AppSettings
 {
-    public bool VoiceEnabled { get; set; } = false;
+    public bool VoiceEnabled    { get; set; } = false;
+    public int  VoiceDeviceIndex { get; set; } = -1; // -1 = padrão do sistema
 
     private static readonly string SettingsFile = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),

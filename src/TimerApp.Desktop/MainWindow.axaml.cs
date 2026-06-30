@@ -6,7 +6,8 @@ using TimerApp.Desktop.ViewModels;
 
 public partial class MainWindow : ReactiveWindow<MainViewModel>
 {
-    private TimerWindow? _overlay;
+    private TimerWindow?        _overlay;
+    private VoiceSettingsWindow? _voiceSettings;
 
     public MainWindow()
     {
@@ -23,12 +24,26 @@ public partial class MainWindow : ReactiveWindow<MainViewModel>
         vm.OverlayRequested         += OnOverlayRequested;
         vm.HotkeySettingsRequested  -= OnHotkeySettingsRequested;
         vm.HotkeySettingsRequested  += OnHotkeySettingsRequested;
+        vm.VoiceSettingsRequested   -= OnVoiceSettingsRequested;
+        vm.VoiceSettingsRequested   += OnVoiceSettingsRequested;
     }
 
     private void OnHotkeySettingsRequested(object? sender, System.EventArgs e)
     {
         if (App.HotkeyService is null) return;
         new HotkeySettingsWindow(App.HotkeyService).Show(this);
+    }
+
+    private void OnVoiceSettingsRequested(object? sender, System.EventArgs e)
+    {
+        if (_voiceSettings is { IsVisible: true })
+        {
+            _voiceSettings.Activate();
+            return;
+        }
+        if (DataContext is not MainViewModel vm || App.HotkeyService is null) return;
+        _voiceSettings = new VoiceSettingsWindow(vm, App.HotkeyService);
+        _voiceSettings.Show(this);
     }
 
     private void OnOverlayRequested(object? sender, System.EventArgs e)

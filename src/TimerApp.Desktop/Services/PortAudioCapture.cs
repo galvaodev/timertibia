@@ -7,19 +7,19 @@ using PortAudioSharp;
 public sealed class PortAudioCapture : IAudioCapture
 {
     private const double SampleRate      = 16000.0;
-    private const uint   FramesPerBuffer = 4000; // ~250ms
+    private const uint   FramesPerBuffer = 4000;
 
     private Stream?          _stream;
-    private Stream.Callback? _callback; // held to prevent GC
+    private Stream.Callback? _callback;
 
     public event Action<byte[], int>? DataAvailable;
 
-    public void Start()
+    public void Start(int deviceIndex = -1)
     {
         PortAudio.LoadNativeLibrary();
         PortAudio.Initialize();
 
-        int device = PortAudio.DefaultInputDevice;
+        int device = deviceIndex >= 0 ? deviceIndex : PortAudio.DefaultInputDevice;
         if (device < 0) throw new InvalidOperationException("Nenhum dispositivo de entrada encontrado.");
 
         var info = PortAudio.GetDeviceInfo(device);
@@ -55,17 +55,12 @@ public sealed class PortAudioCapture : IAudioCapture
 
     public void Stop()
     {
-        try
-        {
-            _stream?.Stop();
-            _stream?.Close();
-            _stream?.Dispose();
-        }
-        catch { /* safe */ }
+        try { _stream?.Stop();    } catch { }
+        try { _stream?.Close();   } catch { }
+        try { _stream?.Dispose(); } catch { }
         _stream   = null;
         _callback = null;
-
-        try { PortAudio.Terminate(); } catch { /* safe */ }
+        try { PortAudio.Terminate(); } catch { }
     }
 
     public void Dispose() => Stop();

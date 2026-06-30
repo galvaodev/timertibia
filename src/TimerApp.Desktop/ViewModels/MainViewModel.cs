@@ -83,6 +83,11 @@ public class MainViewModel : ReactiveObject, IDisposable
     public event EventHandler? HotkeySettingsRequested;
     public void OpenHotkeySettings() => HotkeySettingsRequested?.Invoke(this, EventArgs.Empty);
 
+    // ── Voice settings ───────────────────────────────────────────
+
+    public event EventHandler? VoiceSettingsRequested;
+    public void OpenVoiceSettings() => VoiceSettingsRequested?.Invoke(this, EventArgs.Empty);
+
     // ── Hotkey dispatch ──────────────────────────────────────────
 
     public void HotkeyStart(TimerCategory cat)
@@ -101,6 +106,12 @@ public class MainViewModel : ReactiveObject, IDisposable
 
     public void HotkeyReset(TimerCategory cat)
         => ActiveTimers.FirstOrDefault(t => t.Category == cat)?.ResetTimer();
+
+    public void HotkeyStop(TimerCategory cat)
+    {
+        var card = ActiveTimers.FirstOrDefault(t => t.Category == cat);
+        if (card is not null) StopTimer(card.TimerId);
+    }
 
     public void HotkeyToggleRepeat(TimerCategory cat)
         => ActiveTimers.FirstOrDefault(t => t.Category == cat)?.ToggleRepeat();
@@ -201,11 +212,30 @@ public class MainViewModel : ReactiveObject, IDisposable
     public void StartBoost()  => StartTimer(TimerConfig.CreateBoost());
     public void StartPotion() => StartTimer(TimerConfig.CreatePotion());
 
+    public void StartAll()
+    {
+        StartFood();
+        StartBoost();
+        StartPotion();
+    }
+
     // ── Controls ─────────────────────────────────────────────────
 
     public void PauseTimer(string timerId)     => _services.Timer.Pause(timerId);
     public void ResumeTimer(string timerId)    => _services.Timer.Resume(timerId);
     public void ResetTimerCard(string timerId) => _services.Timer.Reset(timerId);
+
+    public void PauseAll()
+    {
+        foreach (var card in ActiveTimers)
+            if (!card.IsPaused) card.TogglePause();
+    }
+
+    public void ResumeAll()
+    {
+        foreach (var card in ActiveTimers)
+            if (card.IsPaused) card.TogglePause();
+    }
 
     public void StopTimer(string timerId)
     {
@@ -241,21 +271,16 @@ public class MainViewModel : ReactiveObject, IDisposable
         ? $"Baixando modelo... {VoiceDownloadProgress}%"
         : $"Voz: {VoiceStatus}";
 
-    public double VoiceMicOpacity => VoiceEnabled ? 1.0 : 0.35;
+    public double VoiceMicOpacity    => VoiceEnabled ? 1.0 : 0.35;
+    public string VoiceMicBackground  => VoiceEnabled ? "#0e2010" : "#200e0e";
+    public string VoiceMicBorderBrush => VoiceEnabled ? "#2d6a2d" : "#6a2d2d";
+    public string VoiceMicIconColor   => VoiceEnabled ? "#4ade80" : "#f87171";
 
     private bool _voiceEnabled;
     public bool VoiceEnabled
     {
         get => _voiceEnabled;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _voiceEnabled, value);
-            this.RaisePropertyChanged(nameof(VoiceMicOpacity));
-            _appSettings.VoiceEnabled = value;
-            _appSettings.Save();
-            if (value) _ = StartVoiceAsync();
-            else       StopVoice();
-        }
+        set => ApplyVoiceSettings(value, _appSettings.VoiceDeviceIndex);
     }
 
     private string _voiceStatus = "desativado";
@@ -275,6 +300,34 @@ public class MainViewModel : ReactiveObject, IDisposable
         get => _isVoiceListening;
         private set => this.RaiseAndSetIfChanged(ref _isVoiceListening, value);
     }
+
+    // Debug: transcrição em tempo real
+    private string _voicePartial = "";
+    public string VoicePartial
+    {
+        get => _voicePartial;
+        internal set => this.RaiseAndSetIfChanged(ref _voicePartial, value);
+    }
+
+    private string _voiceLastHeard = "";
+    public string VoiceLastHeard
+    {
+        get => _voiceLastHeard;
+        internal set
+        {
+            this.RaiseAndSetIfChanged(ref _voiceLastHeard, value);
+            this.RaisePropertyChanged(nameof(VoiceDebugVisible));
+        }
+    }
+
+    private string _voiceLastResult = "";
+    public string VoiceLastResult
+    {
+        get => _voiceLastResult;
+        internal set => this.RaiseAndSetIfChanged(ref _voiceLastResult, value);
+    }
+
+    public bool VoiceDebugVisible => _voiceEnabled && !string.IsNullOrEmpty(_voiceLastHeard);
 
     private bool _isVoiceDownloading;
     public bool IsVoiceDownloading
@@ -300,16 +353,26 @@ public class MainViewModel : ReactiveObject, IDisposable
         }
     }
 
+    // Called by VoiceSettingsWindow after saving new settings
+    public void ApplyVoiceSettings(bool enabled, int deviceIndex)
+    {
+        _appSettings.VoiceEnabled    = enabled;
+        _appSettings.VoiceDeviceIndex = deviceIndex;
+        _appSettings.Save();
+
+        StopVoice();
+        _voiceEnabled = enabled;
+        this.RaisePropertyChanged(nameof(VoiceEnabled));
+        this.RaisePropertyChanged(nameof(VoiceMicOpacity));
+        this.RaisePropertyChanged(nameof(VoiceMicBackground));
+        this.RaisePropertyChanged(nameof(VoiceMicBorderBrush));
+        this.RaisePropertyChanged(nameof(VoiceMicIconColor));
+
+        if (enabled) _ = StartVoiceAsync();
+    }
+
     private async System.Threading.Tasks.Task StartVoiceAsync()
     {
-        if (!IsVoiceSupported)
-        {
-            VoiceStatus = "não disponível no Mac/Linux ainda";
-            _voiceEnabled = false;
-            this.RaisePropertyChanged(nameof(VoiceEnabled));
-            return;
-        }
-
         if (!VoiceModelManager.IsDownloaded)
         {
             IsVoiceDownloading = true;
@@ -337,11 +400,19 @@ public class MainViewModel : ReactiveObject, IDisposable
             VoiceStatus      = s;
             IsVoiceListening = s != "desativado";
         });
+        _voiceService.PartialReceived += p => Dispatcher.UIThread.Post(() => VoicePartial = p);
+        _voiceService.TranscriptReceived += (heard, result) => Dispatcher.UIThread.Post(() =>
+        {
+            VoicePartial   = "";
+            VoiceLastHeard = heard;
+            VoiceLastResult = result;
+        });
 
-        if (!_voiceService.Start(VoiceModelManager.ModelPath))
+        if (!_voiceService.Start(VoiceModelManager.ModelPath, _appSettings.VoiceDeviceIndex))
         {
             _voiceEnabled = false;
             this.RaisePropertyChanged(nameof(VoiceEnabled));
+            this.RaisePropertyChanged(nameof(VoiceMicOpacity));
             _voiceService.Dispose();
             _voiceService = null;
         }

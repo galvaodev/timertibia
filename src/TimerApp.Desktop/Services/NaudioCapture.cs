@@ -11,10 +11,12 @@ public sealed class NaudioCapture : IAudioCapture
 
     public event Action<byte[], int>? DataAvailable;
 
-    public void Start()
+    public void Start(int deviceIndex = -1)
     {
+        // WaveIn.WAVE_MAPPER = -1 (padrão do sistema)
         _waveIn = new WaveInEvent
         {
+            DeviceNumber      = deviceIndex,
             WaveFormat        = new WaveFormat(SampleRate, 16, 1),
             BufferMilliseconds = 250
         };

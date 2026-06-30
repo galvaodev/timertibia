@@ -4,7 +4,7 @@ using System;
 
 public interface IAudioCapture : IDisposable
 {
-    void Start();
+    void Start(int deviceIndex = -1);
     void Stop();
     event Action<byte[], int>? DataAvailable; // buffer, bytesRecorded
 }
